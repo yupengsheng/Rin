@@ -781,4 +781,14 @@ describe('CacheImpl - 公共缓存开关', () => {
         const freshClientConfig = new CacheImpl(db as any, mockEnv, 'client.config', 'database');
         expect(await freshClientConfig.get('site.name')).toBe('Rin Test');
     });
+
+    it('client.config 默认应跨请求持久化，即使 CACHE_STORAGE_MODE 为 s3', async () => {
+        const s3Env = createMockEnv('s3');
+        const requestScopedClientConfig = new CacheImpl(db as any, s3Env, 'client.config');
+
+        await requestScopedClientConfig.set('site.name', 'Persistent Name');
+
+        const nextRequestClientConfig = new CacheImpl(db as any, s3Env, 'client.config');
+        expect(await nextRequestClientConfig.get('site.name')).toBe('Persistent Name');
+    });
 });

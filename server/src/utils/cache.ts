@@ -210,8 +210,12 @@ export class CacheImpl {
         this.cache = new Map<string, any>();
         this.configReader = configReader;
 
-        // 优先级：参数 > 环境变量，默认为 s3 以向前兼容
-        const mode = storageMode ?? (env.CACHE_STORAGE_MODE as CacheStorageMode) ?? 's3';
+        // Public content cache follows env/default storage, but config stores
+        // must stay request-persistent regardless of CACHE_STORAGE_MODE.
+        const defaultMode = type === "client.config" || type === "server.config" ? "database" : "s3";
+        const mode = storageMode ?? (type === "client.config" || type === "server.config"
+            ? defaultMode
+            : (env.CACHE_STORAGE_MODE as CacheStorageMode) ?? defaultMode);
 
         // 根据存储模式创建对应的提供者
         if (mode === 's3') {
@@ -392,5 +396,5 @@ export function createServerConfig(db: DB, env: Env, storageMode?: CacheStorageM
 }
 
 export function createClientConfig(db: DB, env: Env, storageMode?: CacheStorageMode) {
-    return new CacheImpl(db, env, "client.config", storageMode);
+    return new CacheImpl(db, env, "client.config", storageMode ?? "database");
 }
