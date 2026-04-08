@@ -1,35 +1,31 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
+import { AI_SUMMARY_SYSTEM_PROMPT, generateAISummaryResult } from "../ai";
 
 const originalFetch = globalThis.fetch;
 
-const getAIConfigMock = mock();
-
-mock.module("../db-config", () => ({
-  getAIConfig: getAIConfigMock,
-}));
-
 afterEach(() => {
   globalThis.fetch = originalFetch;
-  getAIConfigMock.mockReset();
 });
+
+function createServerConfig(values: Record<string, unknown>) {
+  return {
+    async get(key: string) {
+      return values[key];
+    },
+  };
+}
 
 describe("generateAISummaryResult", () => {
   it("returns a concrete error when AI responds with empty content", async () => {
-    getAIConfigMock.mockResolvedValue({
-      enabled: true,
-      provider: "worker-ai",
-      model: "llama-3-8b",
-      api_key: "",
-      api_url: "",
-    });
-
-    const { generateAISummaryResult } = await import("../ai");
-
     const result = await generateAISummaryResult({
       AI: {
         run: async () => ({ response: "" }),
       },
-    } as unknown as Env, {} as any, "test content");
+    } as unknown as Env, createServerConfig({
+      "ai_summary.enabled": "true",
+      "ai_summary.provider": "worker-ai",
+      "ai_summary.model": "llama-3-8b",
+    }), "test content");
 
     expect(result.summary).toBeNull();
     expect(result.skipped).toBe(false);
@@ -37,16 +33,7 @@ describe("generateAISummaryResult", () => {
   });
 
   it("sends summary system prompt to Workers AI", async () => {
-    getAIConfigMock.mockResolvedValue({
-      enabled: true,
-      provider: "worker-ai",
-      model: "llama-3-8b",
-      api_key: "",
-      api_url: "",
-    });
-
     const calls: Array<any> = [];
-    const { AI_SUMMARY_SYSTEM_PROMPT, generateAISummaryResult } = await import("../ai");
 
     const result = await generateAISummaryResult({
       AI: {
@@ -55,7 +42,11 @@ describe("generateAISummaryResult", () => {
           return { response: "summary" };
         },
       },
-    } as unknown as Env, {} as any, "test content");
+    } as unknown as Env, createServerConfig({
+      "ai_summary.enabled": "true",
+      "ai_summary.provider": "worker-ai",
+      "ai_summary.model": "llama-3-8b",
+    }), "test content");
 
     expect(result.summary).toBe("summary");
     expect(calls).toHaveLength(1);
@@ -70,14 +61,6 @@ describe("generateAISummaryResult", () => {
   });
 
   it("sends summary system prompt to external AI providers", async () => {
-    getAIConfigMock.mockResolvedValue({
-      enabled: true,
-      provider: "openai",
-      model: "gpt-4o-mini",
-      api_key: "secret",
-      api_url: "https://api.openai.com/v1",
-    });
-
     const requests: Array<any> = [];
     globalThis.fetch = mock(async (_url: string | URL | Request, init?: RequestInit) => {
       requests.push(init);
@@ -89,9 +72,13 @@ describe("generateAISummaryResult", () => {
       });
     }) as typeof fetch;
 
-    const { AI_SUMMARY_SYSTEM_PROMPT, generateAISummaryResult } = await import("../ai");
-
-    const result = await generateAISummaryResult({} as Env, {} as any, "external content");
+    const result = await generateAISummaryResult({} as Env, createServerConfig({
+      "ai_summary.enabled": "true",
+      "ai_summary.provider": "openai",
+      "ai_summary.model": "gpt-4o-mini",
+      "ai_summary.api_key": "secret",
+      "ai_summary.api_url": "https://api.openai.com/v1",
+    }), "external content");
 
     expect(result.summary).toBe("summary");
     expect(requests).toHaveLength(1);
