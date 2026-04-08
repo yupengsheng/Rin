@@ -17,5 +17,5 @@ export function normalizeHeaderBehavior(value: string | undefined | null): Heade
     return value as HeaderBehaviorOption;
   }
 
-  return "fixed";
+  return "reveal";
 }

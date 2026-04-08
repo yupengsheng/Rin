@@ -166,11 +166,7 @@ describe('FeedService', () => {
             expect(data.title).toBe('Test Feed');
         });
 
-        it('should return AI summary generation status for a queued feed', async () => {
-            await serverConfig.set('ai_summary.enabled', 'true', false);
-            await serverConfig.set('ai_summary.provider', 'worker-ai', false);
-            await serverConfig.set('ai_summary.model', 'llama-3-8b', false);
-
+        it('should keep AI summary fields idle when publishing without AI automation', async () => {
             const createRes = await app.request('/', {
                 method: 'POST',
                 headers: {
@@ -191,8 +187,9 @@ describe('FeedService', () => {
 
             expect(getRes.status).toBe(200);
             const data = await getRes.json() as any;
-            expect(data.ai_summary_status).toBe('pending');
+            expect(data.ai_summary_status).toBe('idle');
             expect(data.ai_summary_error).toBe('');
+            expect(data.ai_summary).toBe('');
         });
 
         it('should return 404 for non-existent feed', async () => {

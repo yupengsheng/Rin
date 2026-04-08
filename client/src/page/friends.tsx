@@ -106,7 +106,7 @@ export function FriendsPage() {
                     <PageIntro
                         eyebrow={t('friends.title')}
                         title={t('friends.title')}
-                        description={t('article.total$count', { count: totalFriends })}
+                        description={t('friends.total$count', { count: totalFriends })}
                     />
 
                     <FriendList title={t('friends.title')} friends={friendsAvailable} />

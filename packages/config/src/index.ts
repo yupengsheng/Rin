@@ -7,7 +7,7 @@ export const CLIENT_CONFIG_DEFAULTS = new Map(
     "cache.enabled": false,
     "counter.enabled": true,
     "friend_apply_enable": false,
-    "header.behavior": "fixed",
+    "header.behavior": "reveal",
     "header.layout": "classic",
     "feed.layout": "list",
     "feed.card_variant": "default",

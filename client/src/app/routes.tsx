@@ -17,7 +17,6 @@ import { tryInt } from "../utils/int";
 import { useTranslation } from "react-i18next";
 
 const CallbackPage = lazy(() => import("../page/callback").then((module) => ({ default: module.CallbackPage })));
-const CompatTasksPage = lazy(() => import("../page/compat-tasks").then((module) => ({ default: module.CompatTasksPage })));
 const FeedPage = lazy(() => import("../page/feed").then((module) => ({ default: module.FeedPage })));
 const FeedsPage = lazy(() => import("../page/feeds").then((module) => ({ default: module.FeedsPage })));
 const FriendsPage = lazy(() => import("../page/friends").then((module) => ({ default: module.FriendsPage })));
@@ -25,8 +24,6 @@ const HealthPage = lazy(() => import("../page/health").then((module) => ({ defau
 const HashtagPage = lazy(() => import("../page/hashtag").then((module) => ({ default: module.HashtagPage })));
 const HashtagsPage = lazy(() => import("../page/hashtags").then((module) => ({ default: module.HashtagsPage })));
 const LoginPage = lazy(() => import("../page/login").then((module) => ({ default: module.LoginPage })));
-const MomentsPage = lazy(() => import("../page/moments").then((module) => ({ default: module.MomentsPage })));
-const QueueStatusPage = lazy(() => import("../page/queue-status").then((module) => ({ default: module.QueueStatusPage })));
 const SearchPage = lazy(() => import("../page/search").then((module) => ({ default: module.SearchPage })));
 const Settings = lazy(() => import("../page/settings").then((module) => ({ default: module.Settings })));
 const TimelinePage = lazy(() => import("../page/timeline").then((module) => ({ default: module.TimelinePage })));
@@ -43,10 +40,6 @@ export function AppRoutes() {
 
       <AppRoute path="/timeline">
         <TimelinePage />
-      </AppRoute>
-
-      <AppRoute path="/moments">
-        <MomentsPage />
       </AppRoute>
 
       <AppRoute path="/friends">
@@ -73,12 +66,8 @@ export function AppRoutes() {
         <HealthPage />
       </AdminRoute>
 
-      <AdminRoute path="/admin/queue-status" requirePermission title={t("queue_status.title")} description={t("admin.queue_status_description")}>
-        <QueueStatusPage />
-      </AdminRoute>
-
-      <AdminRoute path="/admin/compat-tasks" requirePermission title={t("compat_tasks.title")} description={t("admin.compat_tasks_description")}>
-        <CompatTasksPage />
+      <AdminRoute path="/admin/friends" requirePermission title={t("friends.title")} description={t("admin.friends_description")}>
+        <FriendsPage />
       </AdminRoute>
 
       <AdminRoute path="/admin/writing" requirePermission title={t("writing")} description={t("admin.writing_description")}>

@@ -63,7 +63,6 @@ export function TimelinePage() {
                 <PageShell className="ani-show">
                     <div className="mx-auto w-full max-w-4xl space-y-6">
                         <PageIntro
-                            eyebrow={t('timeline')}
                             title={t('timeline')}
                             description={t('article.total$count', { count: length })}
                         />

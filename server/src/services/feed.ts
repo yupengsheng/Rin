@@ -5,7 +5,6 @@ import { profileAsync } from "../core/server-timing";
 import { feeds, visits, visitStats } from "../db/schema";
 import { HyperLogLog } from "../utils/hyperloglog";
 import { extractImageWithMetadata } from "../utils/image";
-import { syncFeedAISummaryQueueState } from "./feed-ai-summary";
 import { bindTagToPost } from "./tag";
 import { clearFeedCache } from "./clear-feed-cache";
 export { clearFeedCache } from "./clear-feed-cache";
@@ -124,8 +123,6 @@ export function FeedService(): Hono<{
     app.post('/', async (c) => {
         const db = c.get('db');
         const cache = c.get('cache');
-        const serverConfig = c.get('serverConfig');
-        const env = c.get('env');
         const admin = c.get('admin');
         const uid = c.get('uid');
         const body = await profileAsync(c, 'feed_create_parse', () => c.req.json());
@@ -172,11 +169,6 @@ export function FeedService(): Hono<{
         }).returning({ insertedId: feeds.id }));
 
         await profileAsync(c, 'feed_create_tags', () => bindTagToPost(db, result[0].insertedId, tags));
-        await profileAsync(c, 'feed_create_ai_queue', () => syncFeedAISummaryQueueState(db, serverConfig, env, result[0].insertedId, {
-            draft: Boolean(draft),
-            updatedAt: date,
-            resetSummary: true,
-        }));
         await profileAsync(c, 'feed_create_cache_invalidate', () => cache.deletePrefix('feeds_'));
 
         if (result.length === 0) {
@@ -369,8 +361,6 @@ export function FeedService(): Hono<{
     app.post('/:id', async (c) => {
         const db = c.get('db');
         const cache = c.get('cache');
-        const serverConfig = c.get('serverConfig');
-        const env = c.get('env');
         const admin = c.get('admin');
         const uid = c.get('uid');
         const id = c.req.param('id');
@@ -388,18 +378,12 @@ export function FeedService(): Hono<{
             return c.text('Permission denied', 403);
         }
 
-        const contentChanged = content && content !== feed.content;
-        const isDraft = draft !== undefined ? draft : (feed.draft === 1);
-        const shouldQueueAISummary = (contentChanged && !isDraft) || (!isDraft && feed.draft === 1 && !feed.ai_summary);
         const updateTime = new Date();
 
         await profileAsync(c, 'feed_update_db', () => db.update(feeds).set({
             title,
             content,
             summary,
-            ai_summary: shouldQueueAISummary ? "" : undefined,
-            ai_summary_status: isDraft ? "idle" : undefined,
-            ai_summary_error: shouldQueueAISummary || isDraft ? "" : undefined,
             alias,
             top,
             listed: listed ? 1 : 0,
@@ -410,14 +394,6 @@ export function FeedService(): Hono<{
 
         if (tags) {
             await profileAsync(c, 'feed_update_tags', () => bindTagToPost(db, id_num, tags));
-        }
-
-        if (shouldQueueAISummary || isDraft) {
-            await profileAsync(c, 'feed_update_ai_queue', () => syncFeedAISummaryQueueState(db, serverConfig, env, id_num, {
-                draft: Boolean(isDraft),
-                updatedAt: updateTime,
-                resetSummary: shouldQueueAISummary,
-            }));
         }
 
         await profileAsync(c, 'feed_update_cache_invalidate', () => clearFeedCache(cache, id_num, feed.alias, alias || null));

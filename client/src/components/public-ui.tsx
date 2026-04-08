@@ -59,10 +59,12 @@ export function PageIntro({
   action?: ReactNode;
   className?: string;
 }) {
+  const showEyebrow = eyebrow && eyebrow.trim() !== title.trim();
+
   return (
     <div className={`flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between ${className}`.trim()}>
       <div className="min-w-0">
-        {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-theme/75">{eyebrow}</p> : null}
+        {showEyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-theme/75">{eyebrow}</p> : null}
         <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] t-primary sm:text-4xl">{title}</h1>
         {description ? <p className="mt-2 max-w-2xl text-sm leading-6 t-secondary">{description}</p> : null}
       </div>

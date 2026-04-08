@@ -6,6 +6,7 @@
   "admin": {
     "back_to_site": "返回站点",
     "compat_tasks_description": "批量触发向前兼容任务，用于补齐历史帖子缺失的 AI 摘要和图片 blurhash 元数据。",
+    "friends_description": "在私有管理后台中维护并整理公开展示的友链列表。",
     "health_description": "检查关键配置、缺失的集成项，以及可能影响服务正常运行的风险。",
     "queue_status_description": "查看 AI 摘要队列进度、最近任务结果和失败信息。",
     "settings_description": "在统一的后台空间中管理站点行为、集成配置和发布规则。",
@@ -184,6 +185,8 @@
     "empty_title": "还没有友链",
     "left": "暂时离开",
     "my_apply": "我的申请",
+    "total$count_one": "{{count}} 个友链",
+    "total$count_other": "{{count}} 个友链",
     "review": {
       "accepted": "接受",
       "rejected": "拒绝",
@@ -283,6 +286,8 @@
   "save": "保存",
   "saving": "保存中",
   "settings": {
+    "save_success": "保存成功",
+    "unsaved_changes": "您有未保存的更改",
     "cache": {
       "enabled": {
         "title": "启用缓存",

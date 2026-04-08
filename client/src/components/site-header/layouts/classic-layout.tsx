@@ -2,7 +2,7 @@ import { BrandLink, HeaderActions, Menu, NavBar } from "..";
 import { PreviewActions, PreviewBrand, PreviewCanvas, PreviewContent, PreviewNav } from "../preview-primitives";
 import type { HeaderLayoutDefinition } from "../layout-types";
 
-const PREVIEW_ITEMS = ["Home", "Timeline", "Moments"];
+const PREVIEW_ITEMS = ["Articles", "Timeline", "Friends"];
 
 export const classicLayoutDefinition: HeaderLayoutDefinition = {
   kind: "top",
