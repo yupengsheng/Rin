@@ -181,6 +181,33 @@ describe('UserService', () => {
     });
 
     describe('GET /github/callback - GitHub OAuth callback', () => {
+        it('should handle missing optional GitHub profile fields', async () => {
+            const originalFetch = global.fetch;
+            global.fetch = async () => {
+                return new Response(JSON.stringify({
+                    id: 'gh_missing_avatar',
+                    login: 'user-without-avatar',
+                    name: null
+                }), { status: 200 });
+            };
+
+            try {
+                const res = await app.request('/github/callback?code=valid_code&state=mock_state', {
+                    method: 'GET',
+                    headers: {
+                        'Cookie': 'state=mock_state; redirect_to=http://localhost:5173/callback'
+                    }
+                }, env);
+
+                expect(res.status).toBe(302);
+                const inserted = sqlite.prepare(`SELECT username, avatar FROM users WHERE openid = 'gh_missing_avatar'`).get() as any;
+                expect(inserted.username).toBe('user-without-avatar');
+                expect(inserted.avatar).toBeNull();
+            } finally {
+                global.fetch = originalFetch;
+            }
+        });
+
         it('should exchange code with the same callback redirect_uri', async () => {
             let capturedRedirectUri: string | undefined;
             const originalFetch = global.fetch;

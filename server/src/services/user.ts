@@ -15,6 +15,24 @@ import {
 export function UserService(): Hono {
     const app = new Hono();
 
+    function normalizeGitHubProfile(user: any) {
+        const openid = user?.id == null ? "" : String(user.id);
+        const username = typeof user?.name === "string" && user.name.trim().length > 0
+            ? user.name.trim()
+            : typeof user?.login === "string" && user.login.trim().length > 0
+                ? user.login.trim()
+                : "GitHub User";
+        const avatar = typeof user?.avatar_url === "string" && user.avatar_url.trim().length > 0
+            ? user.avatar_url
+            : null;
+
+        return {
+            openid,
+            username,
+            avatar,
+        };
+    }
+
     // GET /user/github - Redirect to GitHub OAuth
     app.get("/github", async (c: AppContext) => {
         const oauth2 = c.get('oauth2');
@@ -88,15 +106,14 @@ export function UserService(): Hono {
         }));
 
         const user: any = await profileAsync(c, 'user_github_parse', () => response.json());
+        const normalizedProfile = normalizeGitHubProfile(user);
         const profile: {
             openid: string;
             username: string;
-            avatar: string;
-            permission: number | null;
+            avatar: string | null;
+            permission: number;
         } = {
-            openid: user.id,
-            username: user.name || user.login,
-            avatar: user.avatar_url,
+            ...normalizedProfile,
             permission: 0
         };
 
@@ -108,7 +125,7 @@ export function UserService(): Hono {
         }));
 
         if (existingUser) {
-            profile.permission = existingUser.permission;
+            profile.permission = existingUser.permission ?? 0;
             await profileAsync(c, 'user_existing_update', () => db.update(users).set(profile).where(eq(users.id, existingUser.id)));
             authToken = await profileAsync(c, 'user_existing_token', () => jwt.sign({ id: existingUser.id }));
             setJWTCookie(c, authToken);
