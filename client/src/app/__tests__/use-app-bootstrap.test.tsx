@@ -64,7 +64,7 @@ describe("useAppBootstrap", () => {
     const { getByTestId } = render(<TestComponent />);
 
     await waitFor(() => {
-      expect(getByTestId("site-name")).toHaveTextContent("Old Name");
+      expect(getByTestId("site-name").textContent).toBe("Old Name");
     });
 
     await act(async () => {
@@ -75,7 +75,7 @@ describe("useAppBootstrap", () => {
     });
 
     await waitFor(() => {
-      expect(getByTestId("site-name")).toHaveTextContent("New Name");
+      expect(getByTestId("site-name").textContent).toBe("New Name");
     });
   });
 });
