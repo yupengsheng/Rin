@@ -4,6 +4,7 @@ import { ConfigService } from "../config";
 import { setupTestApp, cleanupTestDB } from "../../../tests/fixtures";
 import type { Database } from "bun:sqlite";
 import type { Variables } from "../../core/hono-types";
+import JSZip from "jszip";
 
 describe("ConfigService", () => {
     let db: any;
@@ -576,6 +577,72 @@ describe("ConfigService", () => {
             });
 
             expect(res.status).toBe(200);
+        });
+    });
+
+    describe("GET /export-backup - Export backup", () => {
+        it("should require authentication to export backup", async () => {
+            const res = await app.request("/export-backup", {
+                method: "GET",
+            });
+
+            expect(res.status).toBe(401);
+        });
+
+        it("should export published posts as a zip backup for admin", async () => {
+            sqlite.exec(`
+                INSERT INTO hashtags (id, name) VALUES (1, 'cloudflare'), (2, 'rin');
+                INSERT INTO feeds (id, alias, title, summary, ai_summary, ai_summary_status, ai_summary_error, content, listed, draft, top, uid, created_at, updated_at)
+                VALUES
+                  (1, 'hello-rin', 'Hello Rin', 'Summary text', 'AI summary text', 'completed', '', '# Hello\\n\\nWorld', 1, 0, 0, 1, unixepoch('2026-01-02'), unixepoch('2026-01-03')),
+                  (2, 'draft-post', 'Draft Post', '', '', 'idle', '', '# Draft', 1, 1, 0, 1, unixepoch('2026-01-04'), unixepoch('2026-01-05')),
+                  (3, NULL, 'Unlisted Post', '', '', 'idle', '', '# Unlisted', 0, 0, 0, 1, unixepoch('2026-01-06'), unixepoch('2026-01-07'));
+                INSERT INTO feed_hashtags (feed_id, hashtag_id) VALUES (1, 1), (1, 2);
+            `);
+
+            const res = await app.request("/export-backup", {
+                method: "GET",
+                headers: {
+                    Authorization: "Bearer mock_token_1",
+                },
+            });
+
+            expect(res.status).toBe(200);
+            expect(res.headers.get("content-type")).toContain("application/zip");
+            expect(res.headers.get("content-disposition")).toContain("attachment;");
+
+            const zip = await JSZip.loadAsync(await res.arrayBuffer());
+            const files = Object.keys(zip.files).sort();
+
+            expect(files).toEqual(["2026-01-02-hello-rin.md"]);
+
+            const content = await zip.file("2026-01-02-hello-rin.md")!.async("string");
+            expect(content).toContain("---");
+            expect(content).toContain('title: "Hello Rin"');
+            expect(content).toContain('alias: "hello-rin"');
+            expect(content).toContain("tags:");
+            expect(content).toContain("- cloudflare");
+            expect(content).toContain("- rin");
+            expect(content).toContain('summary: "Summary text"');
+            expect(content).toContain('ai_summary: "AI summary text"');
+            expect(content).toContain('ai_summary_status: "completed"');
+            expect(content).toContain("# Hello");
+            expect(content).not.toContain("Draft Post");
+            expect(content).not.toContain("Unlisted Post");
+        });
+
+        it("should return an empty zip when no published posts exist", async () => {
+            const res = await app.request("/export-backup", {
+                method: "GET",
+                headers: {
+                    Authorization: "Bearer mock_token_1",
+                },
+            });
+
+            expect(res.status).toBe(200);
+
+            const zip = await JSZip.loadAsync(await res.arrayBuffer());
+            expect(Object.keys(zip.files)).toEqual([]);
         });
     });
 

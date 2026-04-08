@@ -482,6 +482,16 @@
       "desc": "启用站点底部 RSS 订阅链接",
       "title": "RSS 订阅链接"
     },
+    "backup": {
+      "title": "博客备份",
+      "desc": "下载包含全部已发布博客 Markdown 内容的 ZIP 备份包。",
+      "export": {
+        "button": "导出备份",
+        "exporting": "导出中...",
+        "success": "备份导出成功",
+        "failed$message": "备份导出失败：{{message}}"
+      }
+    },
     "title": "设置",
     "update_failed$message": "更新失败: {{message}}",
     "wordpress": {

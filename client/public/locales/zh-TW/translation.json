@@ -482,6 +482,16 @@
       "desc": "啟用網站底部 RSS 訂閱連結",
       "title": "RSS 訂閱連結"
     },
+    "backup": {
+      "title": "部落格備份",
+      "desc": "下載包含全部已發佈部落格 Markdown 內容的 ZIP 備份包。",
+      "export": {
+        "button": "匯出備份",
+        "exporting": "匯出中...",
+        "success": "備份匯出成功",
+        "failed$message": "備份匯出失敗：{{message}}"
+      }
+    },
     "title": "設定",
     "update_failed$message": "更新失敗: {{message}}",
     "wordpress": {

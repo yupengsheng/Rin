@@ -473,6 +473,16 @@
       "desc": "サイトフッターにRSS購読リンクを有効にする",
       "title": "RSS 購読リンク"
     },
+    "backup": {
+      "title": "ブログバックアップ",
+      "desc": "公開済みブログ記事を Markdown 形式の ZIP バックアップとしてダウンロードします。",
+      "export": {
+        "button": "バックアップをエクスポート",
+        "exporting": "エクスポート中...",
+        "success": "バックアップのエクスポートに成功しました",
+        "failed$message": "バックアップのエクスポートに失敗しました: {{message}}"
+      }
+    },
     "title": "設定",
     "update_failed$message": "更新に失敗しました: {{message}}",
     "wordpress": {

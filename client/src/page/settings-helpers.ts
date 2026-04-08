@@ -110,6 +110,39 @@ export async function importWordPressFile(file: File) {
   return client.wp.import(xmlContent);
 }
 
+export async function exportPostsBackup() {
+  const response = await fetch(`${endpoint}/api/config/export-backup`, {
+    method: "GET",
+    headers: {
+      Accept: "application/zip",
+      ...headersWithAuth(),
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    let message = response.statusText;
+    try {
+      message = await response.text();
+    } catch {}
+    throw new Error(message || "Export backup failed");
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get("content-disposition") || "";
+  const matchedName = /filename="?([^"]+)"?/i.exec(disposition)?.[1];
+  const fileName = matchedName || `rin-posts-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function buildAIConfigUpdates(updates: Record<string, unknown>) {
   const flatUpdates: Record<string, unknown> = {};
   if (updates.enabled !== undefined) flatUpdates["ai_summary.enabled"] = String(updates.enabled);

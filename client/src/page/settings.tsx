@@ -25,6 +25,7 @@ import {
   areSettingsDraftsEqual,
   buildAIConfigDraftValue,
   createSettingsConfigWrappers,
+  exportPostsBackup,
   importWordPressFile,
   loadSettingsConfigState,
   mergeSessionConfig,
@@ -57,6 +58,7 @@ export function Settings() {
   const [msgList, setMsgList] = useState<{ title: string; reason: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [exportingBackup, setExportingBackup] = useState(false);
   const [testingWebhook, setTestingWebhook] = useState(false);
   const [webhookTestMessage, setWebhookTestMessage] = useState("");
   const [draft, setDraft] = useState<SettingsDraft>({ clientConfig: {}, serverConfig: {} });
@@ -149,6 +151,19 @@ export function Settings() {
       } else if (error) {
         showAlert(t("settings.import_failed$message", { message: error.value }));
       }
+    }
+  }
+
+  async function handleExportBackup() {
+    setExportingBackup(true);
+    try {
+      await exportPostsBackup();
+      showAlert(t("settings.backup.export.success"));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      showAlert(t("settings.backup.export.failed$message", { message }));
+    } finally {
+      setExportingBackup(false);
     }
   }
 
@@ -621,6 +636,25 @@ export function Settings() {
             alertTitle={t("settings.cache.clear.confirm.title")}
             alertDescription={t("settings.cache.clear.confirm.desc")}
           />
+          <div className="w-full">
+            <SettingsCard>
+              <SettingsCardRow
+                header={
+                  <SettingsCardHeader
+                    title={t("settings.backup.title")}
+                    description={t("settings.backup.desc")}
+                  />
+                }
+                action={
+                  <Button
+                    title={exportingBackup ? t("settings.backup.export.exporting") : t("settings.backup.export.button")}
+                    onClick={handleExportBackup}
+                    disabled={exportingBackup}
+                  />
+                }
+              />
+            </SettingsCard>
+          </div>
           <ItemWithUpload
             title={t("settings.wordpress.title")}
             description={t("settings.wordpress.desc")}

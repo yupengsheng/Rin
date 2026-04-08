@@ -22,6 +22,7 @@ import {
     listBlurhashCompatCandidates,
     runCompatAISummaryBackfill,
 } from "./config-compat-tasks";
+import { buildPostsBackupZip } from "./config-export";
 
 export function ConfigService(): Hono {
     const app = new Hono();
@@ -182,6 +183,28 @@ export function ConfigService(): Hono {
         const env = c.get('env');
 
         return c.json(await wrapTime(c, 'queue_status', buildQueueStatusResponse(db, env)));
+    });
+
+    app.get('/export-backup', async (c: AppContext) => {
+        const admin = c.get('admin');
+
+        if (!admin) {
+            return c.text('Unauthorized', 401);
+        }
+
+        const archive = await wrapTime(c, 'export_backup_zip', buildPostsBackupZip(c.get('db')));
+        const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
+        const archiveCopy = new Uint8Array(archive.byteLength);
+        archiveCopy.set(archive);
+
+        return new Response(archiveCopy, {
+            status: 200,
+            headers: {
+                'content-type': 'application/zip',
+                'content-disposition': `attachment; filename="rin-posts-backup-${timestamp}.zip"`,
+                'cache-control': 'no-store',
+            },
+        });
     });
 
     app.get('/compat-tasks', async (c: AppContext) => {

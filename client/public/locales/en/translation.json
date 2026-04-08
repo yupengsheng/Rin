@@ -482,6 +482,16 @@
       "desc": "Enable RSS subscription link at the site footer",
       "title": "RSS Subscription Link"
     },
+    "backup": {
+      "title": "Blog Backup",
+      "desc": "Download a ZIP backup package containing all published blog posts in Markdown format.",
+      "export": {
+        "button": "Export Backup",
+        "exporting": "Exporting...",
+        "success": "Backup exported successfully",
+        "failed$message": "Backup export failed: {{message}}"
+      }
+    },
     "title": "Settings",
     "update_failed$message": "Update failed: {{message}}",
     "wordpress": {
