@@ -113,24 +113,19 @@ export function EmptyState({
 
 const modalStyles: Modal.Styles = {
   content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-    padding: "0",
+    inset: "0",
+    padding: "1rem",
     border: "none",
     background: "transparent",
-    inset: "auto",
-    overflow: "visible",
-    width: "min(92vw, 40rem)",
+    overflow: "auto",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   overlay: {
     backgroundColor: "rgba(15, 23, 42, 0.42)",
     backdropFilter: "blur(10px)",
     zIndex: 1000,
-    padding: "1rem",
   },
 };
 
@@ -151,13 +146,12 @@ export function ModalSurface({
     ...modalStyles,
     content: {
       ...modalStyles.content,
-      width: `min(92vw, ${maxWidth})`,
     },
   };
 
   return (
     <Modal isOpen={isOpen} shouldCloseOnOverlayClick shouldCloseOnEsc onRequestClose={onRequestClose} style={styles}>
-      <SurfaceCard className={`w-full p-6 sm:p-7 ${className}`.trim()}>{children}</SurfaceCard>
+      <SurfaceCard className={`w-[min(92vw,${maxWidth})] p-6 sm:p-7 ${className}`.trim()}>{children}</SurfaceCard>
     </Modal>
   );
 }
