@@ -19,15 +19,37 @@ export function useAppBootstrap() {
   useEffect(() => {
     applyViewportScaling();
 
-    if (initializedRef.current) {
-      return;
-    }
-
     const updateClientConfig = (nextConfig: Record<string, unknown>) => {
       sessionStorage.setItem("config", JSON.stringify(nextConfig));
       setConfig(new ConfigWrapper(nextConfig, defaultClientConfig));
       applyThemeColor(typeof nextConfig["theme.color"] === "string" ? nextConfig["theme.color"] : undefined);
     };
+
+    const syncClientConfigFromSession = () => {
+      const cachedConfig = sessionStorage.getItem("config");
+      if (!cachedConfig) {
+        return;
+      }
+
+      const configObject = JSON.parse(cachedConfig) as Record<string, unknown>;
+      updateClientConfig(configObject);
+    };
+
+    const handleStorage = (event: Event) => {
+      if (typeof StorageEvent !== "undefined" && event instanceof StorageEvent && event.key && event.key !== "config") {
+        return;
+      }
+
+      syncClientConfigFromSession();
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    if (initializedRef.current) {
+      return () => {
+        window.removeEventListener("storage", handleStorage);
+      };
+    }
 
     client.user.profile().then(({ data, error }) => {
       if (data) {
@@ -48,12 +70,14 @@ export function useAppBootstrap() {
     if (bootstrappedConfig) {
       updateClientConfig(bootstrappedConfig);
     } else if (cachedConfig) {
-      const configObject = JSON.parse(cachedConfig) as Record<string, unknown>;
-      setConfig(new ConfigWrapper(configObject, defaultClientConfig));
-      applyThemeColor(typeof configObject["theme.color"] === "string" ? configObject["theme.color"] : undefined);
+      syncClientConfigFromSession();
     }
 
     initializedRef.current = true;
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
   }, []);
 
   return { config, profile };
