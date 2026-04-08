@@ -622,9 +622,9 @@
           "suggestion": "Enable login in settings if this instance needs interactive admin access."
         },
       "missing": {
-        "impact": "Users can see the login entry but no working login method is configured.",
-        "summary": "Neither GitHub OAuth nor password login is configured.",
-        "suggestion": "Configure RIN_GITHUB_CLIENT_ID/RIN_GITHUB_CLIENT_SECRET or ADMIN_USERNAME/ADMIN_PASSWORD."
+        "impact": "The owner cannot sign in to the admin workspace.",
+        "summary": "Password-based admin access is not configured.",
+        "suggestion": "Configure ADMIN_USERNAME and ADMIN_PASSWORD."
       },
       "default_password": {
         "impact": "The admin account is still using the default username and password, which is a critical security risk.",
@@ -638,12 +638,10 @@
       },
       "ready": {
         "impact": "Admin sign-in is available.",
-        "summary": "OAuth login is configured and the current password login configuration is not using the default credentials.",
+        "summary": "Password-based admin access is configured and not using the default credentials.",
         "suggestion": "No action required."
       },
       "details": {
-        "github_configured": "GitHub OAuth: configured",
-        "github_missing": "GitHub OAuth: missing",
         "password_configured": "Password login: configured",
         "password_missing": "Password login: missing",
         "password_default": "Password login: using default credentials"

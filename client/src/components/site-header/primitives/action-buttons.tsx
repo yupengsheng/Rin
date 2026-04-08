@@ -1,10 +1,9 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReactModal from "react-modal";
 import Popup from "reactjs-popup";
 import { useLocation } from "wouter";
 import { client } from "../../../app/runtime";
-import { ClientConfigContext } from "../../../state/config";
 import { type Profile } from "../../../state/profile";
 import { removeAuthToken } from "../../../utils/auth";
 import { Button } from "../../button";
@@ -157,10 +156,8 @@ export function UserAvatar({
 }) {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
-  const label = t("github_login");
-  const config = useContext(ClientConfigContext);
   const [isOpen, setIsOpen] = useState(false);
-  const shouldShowEntry = Boolean(profile) || config.getBoolean("login.enabled");
+  const shouldShowEntry = Boolean(profile);
 
   return shouldShowEntry ? (
     <div className={className + " flex flex-row items-center"}>
@@ -200,7 +197,7 @@ export function UserAvatar({
             <button
               onClick={() => {
                 setIsOpen(false);
-                setLocation("/profile");
+                setLocation("/admin/settings");
               }}
               className="mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/10"
             >
@@ -212,8 +209,8 @@ export function UserAvatar({
                 </div>
               )}
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold t-primary">{profile.name || t("profile.title")}</p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">{t("profile.title")}</p>
+                <p className="truncate text-sm font-semibold t-primary">{profile.name || t("settings.title")}</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">{t("settings.title")}</p>
               </div>
             </button>
             {profile.permission ? (
@@ -242,20 +239,7 @@ export function UserAvatar({
             </button>
           </div>
         </Popup>
-      ) : (
-        <button
-          onClick={() => setLocation("/login")}
-          title={label}
-          aria-label={label}
-          className={
-            plain
-              ? "flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-black/5 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-neutral-100"
-              : "flex rounded-full border dark:border-neutral-600 px-2 bg-w aspect-[1] items-center justify-center t-primary bg-button"
-          }
-        >
-          <i className="ri-user-received-line" />
-        </button>
-      )}
+      ) : null}
     </div>
   ) : null;
 }

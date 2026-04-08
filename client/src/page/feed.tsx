@@ -287,26 +287,13 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                   </div>
                 )}
                 <Markdown content={feed.content} />
-                <div className="mt-6 flex flex-col gap-2">
-                  {feed.hashtags.length > 0 && (
-                    <div className="flex flex-row flex-wrap gap-x-2">
-                      {feed.hashtags.map(({ name }, index) => (
-                        <HashTag key={index} name={name} />
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex flex-row items-center">
-                    <img
-                      src={feed.user.avatar || "/avatar.png"}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div className="ml-2">
-                      <span className="text-gray-400 text-sm cursor-default">
-                        {feed.user.username}
-                      </span>
-                    </div>
+                {feed.hashtags.length > 0 && (
+                  <div className="mt-6 flex flex-row flex-wrap gap-x-2">
+                    {feed.hashtags.map(({ name }, index) => (
+                      <HashTag key={index} name={name} />
+                    ))}
                   </div>
-                </div>
+                )}
               </article>
               <AdjacentSection id={id} setError={setError} />
               {feed && <Comments id={`${feed.id}`} />}

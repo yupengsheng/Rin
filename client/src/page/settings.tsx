@@ -3,7 +3,7 @@ import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useTranslation } from "react-i18next";
 import ReactLoading from "react-loading";
-import { client, oauth_url } from "../app/runtime";
+import { client } from "../app/runtime";
 import { Button } from "../components/button";
 import { useAlert } from "../components/dialog.tsx";
 import { ModalSurface } from "../components/public-ui";
@@ -440,14 +440,6 @@ export function Settings() {
           </div>
 
           <ItemTitle title={t("settings.other.title")} />
-          <ItemSwitch
-            title={t("settings.login.enable.title")}
-            description={t("settings.login.enable.desc", { url: oauth_url })}
-            checked={clientConfig.getBoolean("login.enabled")}
-            onChange={(checked) => {
-              setConfigValue("client", "login.enabled", checked);
-            }}
-          />
           <ItemSwitch
             title={t("settings.comment.enable.title")}
             description={t("settings.comment.enable.desc")}

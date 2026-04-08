@@ -125,7 +125,6 @@ export interface UpdateProfileRequest {
 // ============================================================================
 
 export interface AuthStatus {
-  github: boolean;
   password: boolean;
 }
 
@@ -320,7 +319,6 @@ export const API_PATHS = {
   USER_PROFILE: '/api/user/profile',
   USER_UPDATE_PROFILE: '/api/user/profile',
   USER_LOGOUT: '/api/user/logout',
-  USER_GITHUB: '/api/user/github',
 
   // Tag
   TAG_LIST: '/api/tag',

@@ -2,17 +2,16 @@ import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { ButtonWithLoading } from "../components/button";
-import { Icon } from "../components/icon";
 import { Input } from "../components/input";
 import { CenteredShell, FeedbackBanner, SurfaceCard } from "../components/public-ui";
-import { client, oauth_url } from "../app/runtime";
+import { client } from "../app/runtime";
 import { setAuthToken } from "../utils/auth";
 import { getLoginRedirectPath } from "../utils/auth-redirect";
 
 export function LoginPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [authStatus, setAuthStatus] = useState<{ github: boolean; password: boolean }>({ github: false, password: false });
+    const [authStatus, setAuthStatus] = useState<{ password: boolean }>({ password: false });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [, setLocation] = useLocation();
@@ -102,19 +101,7 @@ export function LoginPage() {
                         </div>
                     )}
 
-                    {authStatus.github && (
-                        <div className="rounded-2xl border border-black/5 bg-black/[0.02] px-5 py-4 text-center dark:border-white/10 dark:bg-white/[0.03]">
-                            {authStatus.password ? <p className="text-xs font-semibold uppercase tracking-[0.24em] t-secondary">{t('login.or')}</p> : null}
-                            {!authStatus.password ? <p className="text-sm t-secondary">{t('login.oauth_only')}</p> : null}
-                            <div className="mt-3 flex justify-center">
-                                <Icon label={t('github_login')} name="ri-github-line" onClick={() => {
-                                    window.location.href = `${oauth_url}`
-                                }} hover={true} />
-                            </div>
-                        </div>
-                    )}
-
-                    {!authStatus.github && !authStatus.password ? (
+                    {!authStatus.password ? (
                         <FeedbackBanner tone="danger">{t('login.no_methods')}</FeedbackBanner>
                     ) : null}
                 </div>

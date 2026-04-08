@@ -47,7 +47,6 @@ export async function buildHealthCheckResponse(
   env: Env,
 ): Promise<HealthCheckResponse> {
   const [
-    loginEnabled,
     rssEnabled,
     siteName,
     siteAvatar,
@@ -55,7 +54,6 @@ export async function buildHealthCheckResponse(
     friendCrontab,
     aiConfig,
   ] = await Promise.all([
-    clientConfig.getOrDefault("login.enabled", true),
     clientConfig.getOrDefault("rss", false),
     clientConfig.get("site.name"),
     clientConfig.get("site.avatar"),
@@ -65,7 +63,6 @@ export async function buildHealthCheckResponse(
   ]);
 
   const items: HealthCheckItem[] = [];
-  const githubReady = Boolean(env.RIN_GITHUB_CLIENT_ID && env.RIN_GITHUB_CLIENT_SECRET);
   const passwordReady = Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD);
   const defaultPasswordInUse =
     env.ADMIN_USERNAME === "admin" && env.ADMIN_PASSWORD === "admin123";
@@ -95,19 +92,7 @@ export async function buildHealthCheckResponse(
     ),
   );
 
-  if (!loginEnabled) {
-    items.push(
-      createItem({
-        id: "login-methods",
-        title: text("health.items.login_methods.title"),
-        status: "warning",
-        configured: false,
-        impact: text("health.items.login_methods.disabled.impact"),
-        summary: text("health.items.login_methods.disabled.summary"),
-        suggestion: text("health.items.login_methods.disabled.suggestion"),
-      }),
-    );
-  } else if (!githubReady && !passwordReady) {
+  if (!passwordReady) {
     items.push(
       createItem({
         id: "login-methods",
@@ -130,37 +115,13 @@ export async function buildHealthCheckResponse(
         summary: text("health.items.login_methods.default_password.summary"),
         suggestion: text("health.items.login_methods.default_password.suggestion"),
         details: [
-          githubReady
-            ? text("health.items.login_methods.details.github_configured")
-            : text("health.items.login_methods.details.github_missing"),
           text("health.items.login_methods.details.password_default"),
-        ],
-      }),
-    );
-  } else if (!githubReady) {
-    items.push(
-      createItem({
-        id: "login-methods",
-        title: text("health.items.login_methods.title"),
-        status: "warning",
-        configured: true,
-        impact: text("health.items.login_methods.oauth_missing.impact"),
-        summary: text("health.items.login_methods.oauth_missing.summary"),
-        suggestion: text("health.items.login_methods.oauth_missing.suggestion"),
-        details: [
-          text("health.items.login_methods.details.github_missing"),
-          passwordReady
-            ? text("health.items.login_methods.details.password_configured")
-            : text("health.items.login_methods.details.password_missing"),
         ],
       }),
     );
   } else {
     const details = [
-      text("health.items.login_methods.details.github_configured"),
-      passwordReady
-        ? text("health.items.login_methods.details.password_configured")
-        : text("health.items.login_methods.details.password_missing"),
+      text("health.items.login_methods.details.password_configured"),
     ];
     items.push(
       createItem({

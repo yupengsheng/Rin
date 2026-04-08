@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import type { DefaultParams, PathPattern } from "wouter";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import { AdminLayout } from "../components/admin-layout";
 import Footer from "../components/footer";
 import { Header } from "../components/header";
 import { Padding } from "../components/padding";
 import { getHeaderLayoutDefinition } from "../components/site-header/layout-registry";
-import { Tips, TipsPage } from "../components/tips";
 import useTableOfContents from "../hooks/useTableOfContents";
 import { useSiteConfig } from "../hooks/useSiteConfig";
 import { CallbackPage } from "../page/callback";
@@ -21,7 +20,6 @@ import { HashtagPage } from "../page/hashtag";
 import { HashtagsPage } from "../page/hashtags";
 import { LoginPage } from "../page/login";
 import { MomentsPage } from "../page/moments";
-import { ProfilePage } from "../page/profile";
 import { QueueStatusPage } from "../page/queue-status";
 import { SearchPage } from "../page/search";
 import { Settings } from "../page/settings";
@@ -97,7 +95,7 @@ export function AppRoutes() {
       </AppRoute>
 
       <AppRoute path="/profile">
-        <ProfilePage />
+        <SettingsRedirect />
       </AppRoute>
 
       <TocRoute path="/feed/:id">
@@ -108,29 +106,26 @@ export function AppRoutes() {
         {(params, toc, cleanup) => <FeedPage id={params.alias || ""} TOC={toc} clean={cleanup} />}
       </TocRoute>
 
-      <AppRoute path="/user/github">
-        <TipsPage>
-          <Tips value={t("error.api_url")} type="error" />
-        </TipsPage>
-      </AppRoute>
-
-      <AppRoute path="/*/user/github">
-        <TipsPage>
-          <Tips value={t("error.api_url_slash")} type="error" />
-        </TipsPage>
-      </AppRoute>
-
-      <AppRoute path="/user/github/callback">
-        <TipsPage>
-          <Tips value={t("error.github_callback")} type="error" />
-        </TipsPage>
-      </AppRoute>
-
       <AppRoute>
         <ErrorPage error={t("error.not_found")} />
       </AppRoute>
     </Switch>
   );
+}
+
+function SettingsRedirect() {
+  const profile = useContext(ProfileContext);
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (profile === undefined) {
+      return;
+    }
+
+    setLocation(profile?.permission ? "/admin/settings" : "/login");
+  }, [profile, setLocation]);
+
+  return null;
 }
 
 function AppRoute({

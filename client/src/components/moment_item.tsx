@@ -31,27 +31,17 @@ export function MomentItem({
     return (
         <div className="rounded-[24px] border border-black/10 bg-w p-5 shadow-[0_20px_45px_-40px_rgba(15,23,42,0.5)] dark:border-white/10">
             <div className="flex justify-between gap-4">
-                <div className="flex items-center space-x-3">
-                    <img 
-                        src={moment.user.avatar} 
-                        alt={moment.user.username} 
-                        className="h-10 w-10 rounded-2xl object-cover"
-                    />
-                    <div>
-                        <p className="font-semibold t-primary">
-                            {moment.user.username}
-                        </p>
-                        <p className="space-x-2 t-secondary text-sm"> 
-                            <span title={new Date(createdAt).toLocaleString()}> 
-                                {createdAt === updatedAt ? timeago(createdAt) : t('feed_card.published$time', { time: timeago(createdAt) })} 
+                <div>
+                    <p className="space-x-2 t-secondary text-sm"> 
+                        <span title={new Date(createdAt).toLocaleString()}> 
+                            {createdAt === updatedAt ? timeago(createdAt) : t('feed_card.published$time', { time: timeago(createdAt) })} 
+                        </span> 
+                        {createdAt !== updatedAt && 
+                            <span title={new Date(updatedAt).toLocaleString()}> 
+                                {t('feed_card.updated$time', { time: timeago(updatedAt) })} 
                             </span> 
-                            {createdAt !== updatedAt && 
-                                <span title={new Date(updatedAt).toLocaleString()}> 
-                                    {t('feed_card.updated$time', { time: timeago(updatedAt) })} 
-                                </span> 
-                            } 
-                        </p>
-                    </div>
+                        } 
+                    </p>
                 </div>
                 {canManage && (
                     <div>

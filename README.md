@@ -13,7 +13,7 @@ English | [简体中文](./README_zh_CN.md)
 
 ## Introduction
 
-Rin is a modern, serverless blog platform built entirely on Cloudflare's developer platform: Pages for hosting, Workers for serverless functions, D1 for SQLite database, and R2 for object storage. Deploy your personal blog with just a domain name pointed to Cloudflare—no server management required.
+Rin is a modern, serverless personal blog engine built for a single author. It runs entirely on Cloudflare's developer platform: Pages for hosting, Workers for serverless functions, D1 for SQLite database, and R2 for object storage, so you can publish a personal site without managing servers.
 
 ## Live Demo
 
@@ -21,14 +21,14 @@ https://xeu.life
 
 ## Features
 
-- **Authentication & Management**: GitHub OAuth login. The first registered user becomes an administrator, while subsequent users join as regular members.
+- **Single-Owner Management**: Password-based administrator access for a personal blog workflow without public registration or GitHub OAuth.
 - **Content Creation**: Write and edit articles with a rich, intuitive editor.
 - **Real-time Autosave**: Local drafts are saved automatically in real-time, with isolation between different articles.
 - **Privacy Control**: Mark articles as "Visible only to me" for private drafts or personal notes, synchronized across devices.
 - **Image Management**: Drag-and-drop or paste images to upload directly to S3-compatible storage (e.g., Cloudflare R2), with automatic link generation.
 - **Custom Slugs**: Assign friendly URLs like `https://yourblog.com/about` using custom article aliases.
 - **Unlisted Posts**: Option to keep articles out of the public homepage listing.
-- **Blogroll**: Add links to friends' blogs. The backend automatically checks link availability every 20 minutes.
+- **Blogroll**: Curate links to friends' blogs, with optional health checks in the background.
 - **Comment System**: Reply to comments or moderate them with delete functionality.
 - **Webhook Notifications**: Receive real-time alerts for new comments via configurable webhooks.
 - **Featured Images**: Automatically detect the first image in an article and use it as the cover image in listings.
