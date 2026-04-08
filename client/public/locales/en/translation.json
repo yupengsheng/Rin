@@ -93,9 +93,26 @@
   "clear": "Clear",
   "close": "Close",
   "comment": {
+    "author_email_required": "Email is required",
+    "author_name_required": "Name is required",
     "empty": "Comment cannot be empty",
+    "form": {
+      "author_email": "Email",
+      "author_name": "Your Name",
+      "author_url": "Website",
+      "desc": "Leave your comment below. Reply and quote are supported.",
+      "remember_me": "Remember my information",
+      "title": "Share Your Thoughts"
+    },
     "placeholder": {
       "title": "Say something..."
+    },
+    "reply": {
+      "button": "Reply",
+      "invalid": "The quoted comment does not belong to this post",
+      "not_found": "The quoted comment was not found",
+      "quote$name": "Quoted {{name}}:",
+      "replying_to$name": "Replying to {{name}}"
     },
     "submit": "Submit Comment",
     "success": "Comment successful",

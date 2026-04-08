@@ -150,8 +150,8 @@ describe('API Client', () => {
   describe('Comment API', () => {
     it('should fetch comments for feed', async () => {
       const mockResponse = [
-        { id: 1, content: 'Comment 1', user: { id: 1, username: 'user1' } },
-        { id: 2, content: 'Comment 2', user: { id: 2, username: 'user2' } },
+        { id: 1, content: 'Comment 1', parentId: null, author: { name: 'user1', avatar: null, url: null, isAdmin: false }, replyTo: null },
+        { id: 2, content: 'Comment 2', parentId: 1, author: { name: 'user2', avatar: null, url: null, isAdmin: false }, replyTo: { id: 1, authorName: 'user1', contentPreview: 'Comment 1' } },
       ]
 
       mockFetch.mockResolvedValueOnce(createMockResponse({
@@ -170,8 +170,12 @@ describe('API Client', () => {
     })
 
     it('should create comment', async () => {
-      const mockResponse = { id: 1, content: 'New comment', user: { id: 1, username: 'user1' } }
-      const commentData = { content: 'New comment' }
+      const mockResponse = { id: 1, content: 'New comment', parentId: null, author: { name: 'Guest', avatar: null, url: null, isAdmin: false }, replyTo: null }
+      const commentData = {
+        content: 'New comment',
+        authorName: 'Guest',
+        authorEmail: 'guest@example.com',
+      }
 
       mockFetch.mockResolvedValueOnce(createMockResponse({
         ok: true,

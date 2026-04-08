@@ -46,10 +46,10 @@ describe('CommentService', () => {
 
         // Insert test comments
         sqlite.exec(`
-            INSERT INTO comments (id, feed_id, user_id, content, created_at) VALUES 
-                (1, 1, 2, 'Comment 1 on feed 1', unixepoch()),
-                (2, 1, 2, 'Comment 2 on feed 1', unixepoch()),
-                (3, 2, 1, 'Comment on feed 2', unixepoch())
+            INSERT INTO comments (id, feed_id, user_id, parent_id, author_name, author_email, author_url, content, created_at) VALUES 
+                (1, 1, 2, NULL, 'User 2', 'user2@example.com', 'https://user2.example.com', 'Comment 1 on feed 1', unixepoch()),
+                (2, 1, NULL, 1, 'Guest Reply', 'guest@example.com', NULL, 'Reply to comment 1', unixepoch()),
+                (3, 2, 1, NULL, 'User 1', 'user1@example.com', NULL, 'Comment on feed 2', unixepoch())
         `);
     }
 
@@ -62,8 +62,8 @@ describe('CommentService', () => {
             expect(data).toBeArray();
             expect(data.length).toBe(2);
             expect(data[0]).toHaveProperty('content');
-            expect(data[0]).toHaveProperty('user');
-            expect(data[0].user).toHaveProperty('username');
+            expect(data[0]).toHaveProperty('author');
+            expect(data[0].author).toHaveProperty('name');
         });
 
         it('should return empty array when feed has no comments', async () => {
@@ -87,72 +87,103 @@ describe('CommentService', () => {
             // Should not include feedId and userId (excluded in query)
             expect(data[0]).not.toHaveProperty('feedId');
             expect(data[0]).not.toHaveProperty('userId');
+            expect(data[0]).not.toHaveProperty('authorEmail');
             
-            // Should include user info
-            expect(data[0].user).toHaveProperty('id');
-            expect(data[0].user).toHaveProperty('username');
-            expect(data[0].user).toHaveProperty('avatar');
-            expect(data[0].user).toHaveProperty('permission');
+            // Should include author info
+            expect(data[0].author).toHaveProperty('name');
+            expect(data[0].author).toHaveProperty('avatar');
+            expect(data[0].author).toHaveProperty('url');
+            expect(data[0].author).toHaveProperty('isAdmin');
         });
 
-        it('should order comments by createdAt descending', async () => {
+        it('should include reply metadata', async () => {
             const res = await app.request('/1', { method: 'GET' }, env);
             
             expect(res.status).toBe(200);
             const data = await res.json() as any;
             expect(data.length).toBe(2);
+            expect(data[1].parentId).toBe(1);
+            expect(data[1].replyTo.authorName).toBe('User 2');
         });
     });
 
     describe('POST /:feed - Create comment', () => {
-        it('should create comment with authenticated user', async () => {
+        it('should create anonymous comment without authentication', async () => {
             const res = await app.request('/1', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer mock_token_1',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ content: 'New test comment' }),
+                body: JSON.stringify({
+                    content: 'New test comment',
+                    authorName: 'Guest',
+                    authorEmail: 'guest@example.com',
+                    authorUrl: 'https://guest.example.com',
+                }),
             }, env);
 
             expect(res.status).toBe(200);
             
             // Verify comment was created
-            const comments = sqlite.prepare(`SELECT * FROM comments WHERE feed_id = 1`).all();
-            expect(comments.length).toBe(3);
+            const comments = sqlite.prepare(`SELECT * FROM comments WHERE feed_id = 1 AND content = 'New test comment'`).all() as any[];
+            expect(comments.length).toBe(1);
+            expect(comments[0].author_name).toBe('Guest');
+            expect(comments[0].author_email).toBe('guest@example.com');
+            expect(comments[0].author_url).toBe('https://guest.example.com');
         });
 
-        it('should require authentication', async () => {
+        it('should create reply comment with parentId', async () => {
             const res = await app.request('/1', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: 'Test comment' }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: 'Nested reply',
+                    authorName: 'Reply User',
+                    authorEmail: 'reply@example.com',
+                    parentId: 1,
+                }),
             }, env);
 
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(200);
+
+            const comments = sqlite.prepare(`SELECT * FROM comments WHERE content = 'Nested reply'`).all() as any[];
+            expect(comments.length).toBe(1);
+            expect(comments[0].parent_id).toBe(1);
         });
 
         it('should require content', async () => {
             const res = await app.request('/1', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer mock_token_1',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ content: '' }),
+                body: JSON.stringify({ content: '', authorName: 'Guest', authorEmail: 'guest@example.com' }),
             }, env);
 
             expect(res.status).toBe(400);
         });
 
-        it('should return 401 for non-existent user token', async () => {
+        it('should require author name', async () => {
             const res = await app.request('/1', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer mock_token_999',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ content: 'Test' }),
+                body: JSON.stringify({ content: 'Test', authorEmail: 'guest@example.com' }),
+            }, env);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should require author email', async () => {
+            const res = await app.request('/1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: 'Test', authorName: 'Guest' }),
             }, env);
 
             expect(res.status).toBe(400);
@@ -162,10 +193,26 @@ describe('CommentService', () => {
             const res = await app.request('/999', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer mock_token_1',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ content: 'Test' }),
+                body: JSON.stringify({ content: 'Test', authorName: 'Guest', authorEmail: 'guest@example.com' }),
+            }, env);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should reject replies to comments on another feed', async () => {
+            const res = await app.request('/1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: 'Cross-feed reply',
+                    authorName: 'Guest',
+                    authorEmail: 'guest@example.com',
+                    parentId: 3,
+                }),
             }, env);
 
             expect(res.status).toBe(400);
@@ -180,10 +227,13 @@ describe('CommentService', () => {
             const res = await app.request('/1', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer mock_token_1',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ content: 'Comment survives webhook errors' }),
+                body: JSON.stringify({
+                    content: 'Comment survives webhook errors',
+                    authorName: 'Guest',
+                    authorEmail: 'guest@example.com',
+                }),
             }, env);
 
             expect(res.status).toBe(200);
@@ -194,19 +244,6 @@ describe('CommentService', () => {
     });
 
     describe('DELETE /:id - Delete comment', () => {
-        it('should allow user to delete their own comment', async () => {
-            const res = await app.request('/1', {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer mock_token_2' },
-            }, env);
-
-            expect(res.status).toBe(200);
-            
-            // Verify comment was deleted
-            const dbResult = sqlite.prepare(`SELECT * FROM comments WHERE id = 1`).all();
-            expect(dbResult.length).toBe(0);
-        });
-
         it('should allow admin to delete any comment', async () => {
             const res = await app.request('/1', {
                 method: 'DELETE',
@@ -216,13 +253,24 @@ describe('CommentService', () => {
             expect(res.status).toBe(200);
         });
 
-        it('should deny deletion by other users', async () => {
+        it('should cascade delete direct replies', async () => {
+            const res = await app.request('/1', {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer mock_token_3' },
+            }, env);
+
+            expect(res.status).toBe(200);
+            const rows = sqlite.prepare(`SELECT * FROM comments WHERE id IN (1, 2)`).all();
+            expect(rows.length).toBe(0);
+        });
+
+        it('should deny deletion by non-admin users', async () => {
             const res = await app.request('/1', {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer mock_token_1' },
             }, env);
 
-            expect(res.status).toBe(403);
+            expect(res.status).toBe(401);
         });
 
         it('should require authentication', async () => {
@@ -234,7 +282,7 @@ describe('CommentService', () => {
         it('should return 404 for non-existent comment', async () => {
             const res = await app.request('/999', {
                 method: 'DELETE',
-                headers: { 'Authorization': 'Bearer mock_token_1' },
+                headers: { 'Authorization': 'Bearer mock_token_3' },
             }, env);
 
             expect(res.status).toBe(404);

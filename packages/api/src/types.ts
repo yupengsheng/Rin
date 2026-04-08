@@ -165,16 +165,26 @@ export interface Comment {
   content: string;
   createdAt: string;
   updatedAt: string;
-  user: {
-    id: number;
-    username: string;
+  parentId: number | null;
+  author: {
+    name: string;
     avatar: string | null;
-    permission: number | null;
+    url: string | null;
+    isAdmin: boolean;
   };
+  replyTo: {
+    id: number;
+    authorName: string;
+    contentPreview: string;
+  } | null;
 }
 
 export interface CreateCommentRequest {
   content: string;
+  authorName: string;
+  authorEmail: string;
+  authorUrl?: string;
+  parentId?: number;
 }
 
 // ============================================================================

@@ -93,9 +93,26 @@
   "clear": "清除",
   "close": "关闭",
   "comment": {
+    "author_email_required": "电子邮件不能为空",
+    "author_name_required": "姓名不能为空",
     "empty": "评论内容不能为空",
+    "form": {
+      "author_email": "电子邮件",
+      "author_name": "您的大名",
+      "author_url": "个人网址",
+      "desc": "您的留言（支持引用与回复）",
+      "remember_me": "记住个人信息",
+      "title": "我要发表看法"
+    },
     "placeholder": {
       "title": "说点什么吧"
+    },
+    "reply": {
+      "button": "回复",
+      "invalid": "引用的评论不属于当前文章",
+      "not_found": "引用的评论不存在",
+      "quote$name": "引用 {{name}}：",
+      "replying_to$name": "正在回复 {{name}}"
     },
     "submit": "发表评论",
     "success": "评论成功",

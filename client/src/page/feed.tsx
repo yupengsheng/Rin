@@ -1,4 +1,4 @@
-import type { Feed } from "@rin/api";
+import type { Comment as ApiComment, CreateCommentRequest, Feed } from "@rin/api";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useTranslation } from "react-i18next";
@@ -367,139 +367,186 @@ export function TOCHeader({ TOC }: { TOC: () => JSX.Element }) {
   );
 }
 
+function normalizeCommentError(error: string, t: ReturnType<typeof useTranslation>["t"]) {
+  if (error === "Content is required") return t("comment.empty");
+  if (error === "Author name is required") return t("comment.author_name_required");
+  if (error === "Author email is required") return t("comment.author_email_required");
+  if (error === "Parent comment not found") return t("comment.reply.not_found");
+  if (error === "Parent comment does not belong to this feed") return t("comment.reply.invalid");
+  return error;
+}
+
 function CommentInput({
   id,
   onRefresh,
+  replyTarget,
+  onCancelReply,
 }: {
   id: string;
   onRefresh: () => void;
+  replyTarget: ApiComment | null;
+  onCancelReply: () => void;
 }) {
   const { t } = useTranslation();
   const [content, setContent] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [authorEmail, setAuthorEmail] = useState("");
+  const [authorUrl, setAuthorUrl] = useState("");
+  const [rememberInfo, setRememberInfo] = useState(false);
   const [error, setError] = useState("");
   const { showAlert, AlertUI } = useAlert();
-  const profile = useContext(ProfileContext);
-  const [, setLocation] = useLocation();
-  function errorHumanize(error: string) {
-    if (error === "Unauthorized") return t("login.required");
-    else if (error === "Content is required") return t("comment.empty");
-    return error;
-  }
+  const storageKey = "rin_comment_author_info";
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        authorName?: string;
+        authorEmail?: string;
+        authorUrl?: string;
+      };
+      setAuthorName(parsed.authorName || "");
+      setAuthorEmail(parsed.authorEmail || "");
+      setAuthorUrl(parsed.authorUrl || "");
+      setRememberInfo(Boolean(parsed.authorName || parsed.authorEmail || parsed.authorUrl));
+    } catch {}
+  }, []);
+
   function submit() {
-    if (!profile) {
-      setLocation('/login')
-      return;
+    const payload: CreateCommentRequest = {
+      content,
+      authorName,
+      authorEmail,
+      authorUrl: authorUrl || undefined,
+      parentId: replyTarget?.id,
+    };
+
+    if (rememberInfo) {
+      localStorage.setItem(storageKey, JSON.stringify({ authorName, authorEmail, authorUrl }));
+    } else {
+      localStorage.removeItem(storageKey);
     }
-    client.comment
-      .create(parseInt(id), { content })
-      .then(({ error }) => {
-        if (error) {
-          setError(errorHumanize(error.value as string));
-        } else {
-          setContent("");
-          setError("");
-          showAlert(t("comment.success"), () => {
-            onRefresh();
-          });
-        }
-      });
+
+    client.comment.create(parseInt(id), payload).then(({ error }) => {
+      if (error) {
+        setError(normalizeCommentError(error.value as string, t));
+      } else {
+        setContent("");
+        setError("");
+        onCancelReply();
+        showAlert(t("comment.success"), () => {
+          onRefresh();
+        });
+      }
+    });
   }
+
   return (
-    <div className="w-full rounded-2xl bg-w t-primary p-6 items-end flex flex-col">
-      <div className="flex flex-col w-full items-start mb-4">
-        <label htmlFor="comment">{t("comment.title")}</label>
+    <div className="w-full rounded-2xl bg-w t-primary p-6 flex flex-col shadow-[0_0_0_1px_rgba(0,0,0,0.04)]">
+      <div className="mb-4 flex w-full flex-col items-start gap-1">
+        <label htmlFor="comment" className="text-3xl font-bold">{t("comment.form.title")}</label>
+        <p className="text-sm text-neutral-500">{t("comment.form.desc")}</p>
       </div>
-      {profile ? (<>
-        <textarea
-          id="comment"
-          placeholder={t("comment.placeholder.title")}
-          className="bg-w w-full h-24 rounded-lg"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <button
-          className="mt-4 bg-theme text-white px-4 py-2 rounded-full"
-          onClick={submit}
-        >
+      {replyTarget ? (
+        <div className="mb-4 w-full rounded-xl border border-black/5 bg-secondary/40 px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold t-primary">
+                {t("comment.reply.replying_to$name", { name: replyTarget.author.name })}
+              </p>
+              <p className="truncate text-sm text-neutral-500">{replyTarget.content}</p>
+            </div>
+            <button className="text-sm text-neutral-500 hover:text-neutral-800" onClick={onCancelReply}>
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      ) : null}
+      <textarea
+        id="comment"
+        placeholder={t("comment.placeholder.title")}
+        className="bg-w w-full h-40 rounded-lg border border-black/10 px-4 py-3"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+      />
+      <div className="mt-4 grid w-full gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">{t("comment.form.author_name")}</label>
+          <input className="rounded-lg border border-black/10 bg-w px-3 py-2" value={authorName} onChange={(e) => setAuthorName(e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">{t("comment.form.author_email")}</label>
+          <input className="rounded-lg border border-black/10 bg-w px-3 py-2" value={authorEmail} onChange={(e) => setAuthorEmail(e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-2 md:col-span-2">
+          <label className="text-sm font-medium">{t("comment.form.author_url")}</label>
+          <input className="rounded-lg border border-black/10 bg-w px-3 py-2" value={authorUrl} onChange={(e) => setAuthorUrl(e.target.value)} />
+        </div>
+      </div>
+      <div className="mt-4 flex w-full items-center justify-between gap-4">
+        <label className="flex items-center gap-2 text-sm text-neutral-600">
+          <input type="checkbox" checked={rememberInfo} onChange={(e) => setRememberInfo(e.target.checked)} />
+          {t("comment.form.remember_me")}
+        </label>
+        <button className="bg-theme text-white px-6 py-2 rounded-full" onClick={submit}>
           {t("comment.submit")}
         </button>
-      </>      ) : (
-        <div className="flex flex-row w-full items-center justify-center space-x-2 py-12">
-          <button
-            className="mt-2 bg-theme text-white px-4 py-2 rounded-full"
-            onClick={() => setLocation('/login')}
-          >
-            {t("login.required")}
-          </button>
-        </div>
-      )}
+      </div>
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
       <AlertUI />
     </div>
   );
 }
 
-type Comment = {
-  id: number;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  user: {
-    id: number;
-    username: string;
-    avatar: string | null;
-    permission: number | null;
-  };
-};
-
 function Comments({ id }: { id: string }) {
   const config = useContext(ClientConfigContext);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<ApiComment[]>([]);
+  const [replyTarget, setReplyTarget] = useState<ApiComment | null>(null);
   const [error, setError] = useState<string>();
   const ref = useRef("");
   const { t } = useTranslation();
 
   function loadComments() {
-    client.comment
-      .list(parseInt(id))
-      .then(({ data, error }) => {
-        if (error) {
-          setError(error.value as string);
-        } else if (data && Array.isArray(data)) {
-          setComments(data as any);
-        }
-      });
+    client.comment.list(parseInt(id)).then(({ data, error }) => {
+      if (error) {
+        setError(error.value as string);
+      } else if (data && Array.isArray(data)) {
+        setComments(data as ApiComment[]);
+      }
+    });
   }
+
   useEffect(() => {
     if (ref.current == id) return;
     loadComments();
     ref.current = id;
   }, [id]);
+
+  const rootComments = comments.filter((comment) => comment.parentId == null);
+
   return (
     <>
       {config.getBoolean('comment.enabled') &&
         <div className="m-2 flex flex-col justify-center items-center">
-          <CommentInput id={id} onRefresh={loadComments} />
+          <CommentInput id={id} onRefresh={loadComments} replyTarget={replyTarget} onCancelReply={() => setReplyTarget(null)} />
           {error && (
-            <>
-              <div className="flex flex-col wauto rounded-2xl bg-w t-primary m-2 p-6 items-center justify-center">
-                <h1 className="text-xl font-bold t-primary">{error}</h1>
-                <button
-                  className="mt-2 bg-theme text-white px-4 py-2 rounded-full"
-                  onClick={loadComments}
-                >
-                  {t("reload")}
-                </button>
-              </div>
-            </>
+            <div className="flex flex-col wauto rounded-2xl bg-w t-primary m-2 p-6 items-center justify-center">
+              <h1 className="text-xl font-bold t-primary">{error}</h1>
+              <button className="mt-2 bg-theme text-white px-4 py-2 rounded-full" onClick={loadComments}>
+                {t("reload")}
+              </button>
+            </div>
           )}
-          {comments.length > 0 && (
+          {rootComments.length > 0 && (
             <div className="w-full">
-              {comments.map((comment) => (
-                <CommentItem
+              {rootComments.map((comment) => (
+                <CommentThread
                   key={comment.id}
                   comment={comment}
+                  replies={comments.filter((item) => item.parentId === comment.id)}
                   onRefresh={loadComments}
+                  onReply={setReplyTarget}
                 />
               ))}
             </div>
@@ -510,77 +557,114 @@ function Comments({ id }: { id: string }) {
   );
 }
 
+function CommentThread({
+  comment,
+  replies,
+  onRefresh,
+  onReply,
+}: {
+  comment: ApiComment;
+  replies: ApiComment[];
+  onRefresh: () => void;
+  onReply: (comment: ApiComment) => void;
+}) {
+  return (
+    <div className="mt-3">
+      <CommentItem comment={comment} onRefresh={onRefresh} onReply={onReply} />
+      {replies.length > 0 ? (
+        <div className="ml-8 border-l border-black/5 pl-4">
+          {replies.map((reply) => (
+            <CommentItem key={reply.id} comment={reply} onRefresh={onRefresh} onReply={onReply} compact />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function CommentItem({
   comment,
   onRefresh,
+  onReply,
+  compact = false,
 }: {
-  comment: Comment;
+  comment: ApiComment;
   onRefresh: () => void;
+  onReply: (comment: ApiComment) => void;
+  compact?: boolean;
 }) {
   const { showConfirm, ConfirmUI } = useConfirm();
   const { showAlert, AlertUI } = useAlert();
   const { t } = useTranslation();
   const profile = useContext(ProfileContext);
+
   function deleteComment() {
     showConfirm(
       t("delete.comment.title"),
       t("delete.comment.confirm"),
       async () => {
-        client.comment
-          .delete(comment.id)
-          .then(({ error }) => {
-            if (error) {
-              showAlert(error.value as string);
-            } else {
-              showAlert(t("delete.success"), () => {
-                onRefresh();
-              });
-            }
-          });
+        client.comment.delete(comment.id).then(({ error }) => {
+          if (error) {
+            showAlert(error.value as string);
+          } else {
+            showAlert(t("delete.success"), () => {
+              onRefresh();
+            });
+          }
+        });
       })
   }
+
   return (
-    <div className="flex flex-row items-start rounded-xl mt-2">
-      <img
-        src={comment.user.avatar || ""}
-        className="w-8 h-8 rounded-full mt-4"
-      />
+    <div className={`flex flex-row items-start rounded-xl mt-2 ${compact ? "bg-secondary/20" : ""}`}>
+      <img src={comment.author.avatar || "/avatar.png"} className="w-8 h-8 rounded-full mt-4 object-cover" />
       <div className="flex flex-col flex-1 w-0 ml-2 bg-w rounded-xl p-4">
-        <div className="flex flex-row">
-          <span className="t-primary text-base font-bold">
-            {comment.user.username}
-          </span>
+        <div className="flex flex-row items-center gap-2">
+          {comment.author.url ? (
+            <a href={comment.author.url} target="_blank" rel="noreferrer" className="t-primary text-base font-bold hover:underline">
+              {comment.author.name}
+            </a>
+          ) : (
+            <span className="t-primary text-base font-bold">{comment.author.name}</span>
+          )}
+          {comment.author.isAdmin ? (
+            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-xs font-medium text-theme">{t("admin.title")}</span>
+          ) : null}
           <div className="flex-1 w-0" />
-          <span
-            title={new Date(comment.createdAt).toLocaleString()}
-            className="text-gray-400 text-sm"
-          >
+          <span title={new Date(comment.createdAt).toLocaleString()} className="text-gray-400 text-sm">
             {timeago(comment.createdAt)}
           </span>
         </div>
-        <p className="t-primary break-words">{comment.content}</p>
+        {comment.replyTo ? (
+          <blockquote className="my-2 rounded-lg border-l-4 border-theme/30 bg-secondary/30 px-3 py-2 text-sm text-neutral-600">
+            <p className="font-medium">{t("comment.reply.quote$name", { name: comment.replyTo.authorName })}</p>
+            <p className="truncate">{comment.replyTo.contentPreview}</p>
+          </blockquote>
+        ) : null}
+        <p className="t-primary break-words whitespace-pre-wrap">{comment.content}</p>
         <div className="flex flex-row justify-end">
-          {(profile?.permission || profile?.id == comment.user.id) && (
-            <Popup
-              arrow={false}
-              trigger={
-                <button className="px-2 py bg-secondary rounded-full">
-                  <i className="ri-more-fill t-secondary"></i>
-                </button>
-              }
-              position="left center"
-            >
-              <div className="flex flex-row self-end mr-2">
-                <button
-                  onClick={deleteComment}
-                  aria-label={t("delete.comment.title")}
-                  className="px-2 py bg-secondary rounded-full"
-                >
-                  <i className="ri-delete-bin-2-line t-secondary"></i>
-                </button>
-              </div>
-            </Popup>
-          )}
+          <div className="flex items-center gap-2">
+            <button className="px-2 py text-sm text-neutral-500 hover:text-neutral-800" onClick={() => onReply(comment)}>
+              {t("comment.reply.button")}
+            </button>
+            {profile?.permission ? (
+              <Popup
+                arrow={false}
+                trigger={
+                  <button className="px-2 py bg-secondary rounded-full">
+                    <i className="ri-more-fill t-secondary"></i>
+                  </button>
+                }
+                position="left center"
+              >
+                <div className="flex flex-row self-end mr-2">
+                  <button onClick={deleteComment} aria-label={t("delete.comment.title")} className="px-2 py bg-secondary rounded-full">
+                    <i className="ri-delete-bin-2-line t-secondary"></i>
+                  </button>
+                </div>
+              </Popup>
+            ) : null}
+          </div>
         </div>
       </div>
       <ConfirmUI />

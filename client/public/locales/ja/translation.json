@@ -93,9 +93,26 @@
   "clear": "クリア",
   "close": "閉じる",
   "comment": {
+    "author_email_required": "メールアドレスは必須です",
+    "author_name_required": "名前は必須です",
     "empty": "コメント内容は空にできません",
+    "form": {
+      "author_email": "メールアドレス",
+      "author_name": "お名前",
+      "author_url": "個人サイト",
+      "desc": "コメントを残してください。返信と引用に対応しています。",
+      "remember_me": "個人情報を保存する",
+      "title": "コメントを投稿する"
+    },
     "placeholder": {
       "title": "何か言ってください..."
+    },
+    "reply": {
+      "button": "返信",
+      "invalid": "引用先のコメントはこの投稿に属していません",
+      "not_found": "引用先のコメントが見つかりません",
+      "quote$name": "{{name}} への引用:",
+      "replying_to$name": "{{name}} に返信中"
     },
     "submit": "コメントを投稿",
     "success": "コメントに成功しました",
