@@ -28,6 +28,10 @@ function isQueueAlreadyPresentError(stderr: string) {
   return stderr.includes("already exists") || stderr.includes("already taken") || stderr.includes("[code: 11009]");
 }
 
+function isCloudflareAuthError(output: string) {
+  return output.includes("Authentication error") || output.includes("[code: 9106]") || output.includes("Account API Token");
+}
+
 export function collectWorkerSecrets(source: Record<string, string | undefined> = process.env) {
   const secrets: Record<string, string> = {};
 
@@ -222,9 +226,19 @@ export async function runCloudflareDeploy(target: "all" | "server" | "client" = 
 
   const { exitCode, stderr, stdout } = await $`${bunExec} x wrangler d1 create ${dbName}`.quiet().nothrow();
   if (exitCode !== 0 && !stderr.toString().includes("already exists")) {
+    const errorOutput = `${stdout.toString()}\n${stderr.toString()}`;
     console.error(`Failed to create D1 "${dbName}"`);
     console.error(stripIndent(stdout.toString()));
     console.error(stripIndent(stderr.toString()));
+    if (isCloudflareAuthError(errorOutput)) {
+      console.error(
+        stripIndent(`
+          Cloudflare authentication appears to be misconfigured.
+          Use a User API Token with D1, Queues, and Workers edit permissions.
+          If GitHub Actions environments define CLOUDFLARE_API_TOKEN, update those secrets too because they override repository secrets.
+        `),
+      );
+    }
     process.exit(1);
   }
 
