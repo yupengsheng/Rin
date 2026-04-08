@@ -100,9 +100,20 @@
       "author_email": "电子邮件",
       "author_name": "您的大名",
       "author_url": "个人网址",
+      "complete_required": "填写完必填字段后即可发布评论",
+      "content": "留言内容",
       "desc": "您的留言（支持引用与回复）",
+      "optional_label": "可选",
+      "optional_tip": "个人网址为可选项，仅用于展示您的主页链接",
+      "ready_hint": "信息已就绪，可以发布评论",
       "remember_me": "记住个人信息",
+      "required_label": "必填",
+      "required_tip": "必填字段：留言内容、您的大名、电子邮件",
       "title": "我要发表看法"
+    },
+    "list": {
+      "count$count": "{{count}} 条评论",
+      "empty": "还没有评论，来做第一个留言的人吧。"
     },
     "placeholder": {
       "title": "说点什么吧"

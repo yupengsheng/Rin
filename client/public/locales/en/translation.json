@@ -100,9 +100,20 @@
       "author_email": "Email",
       "author_name": "Your Name",
       "author_url": "Website",
+      "complete_required": "Complete the required fields to publish your comment",
+      "content": "Comment",
       "desc": "Leave your comment below. Reply and quote are supported.",
+      "optional_label": "Optional",
+      "optional_tip": "Website is optional and only used to link your homepage",
+      "ready_hint": "Required fields complete. Ready to publish.",
       "remember_me": "Remember my information",
+      "required_label": "Required",
+      "required_tip": "Required fields: comment, name, and email",
       "title": "Share Your Thoughts"
+    },
+    "list": {
+      "count$count": "{{count}} comments",
+      "empty": "No comments yet. Be the first to leave a thoughtful note."
     },
     "placeholder": {
       "title": "Say something..."

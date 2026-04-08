@@ -394,8 +394,17 @@ function CommentInput({
   const [authorUrl, setAuthorUrl] = useState("");
   const [rememberInfo, setRememberInfo] = useState(false);
   const [error, setError] = useState("");
-  const { showAlert, AlertUI } = useAlert();
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const storageKey = "rin_comment_author_info";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const trimmedContent = content.trim();
+  const trimmedAuthorName = authorName.trim();
+  const trimmedAuthorEmail = authorEmail.trim();
+  const trimmedAuthorUrl = authorUrl.trim();
+  const isFormComplete = Boolean(trimmedContent && trimmedAuthorName && trimmedAuthorEmail);
+  const canSubmit = isFormComplete && !isSubmitting;
 
   useEffect(() => {
     try {
@@ -413,88 +422,243 @@ function CommentInput({
     } catch {}
   }, []);
 
+  useEffect(() => {
+    if (!replyTarget) return;
+    requestAnimationFrame(() => {
+      containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      textareaRef.current?.focus();
+    });
+  }, [replyTarget?.id]);
+
+  function clearFeedback() {
+    if (error) setError("");
+    if (successMessage) setSuccessMessage("");
+  }
+
   function submit() {
+    if (isSubmitting) return;
+    if (!trimmedContent) {
+      setSuccessMessage("");
+      setError(t("comment.empty"));
+      textareaRef.current?.focus();
+      return;
+    }
+    if (!trimmedAuthorName) {
+      setSuccessMessage("");
+      setError(t("comment.author_name_required"));
+      return;
+    }
+    if (!trimmedAuthorEmail) {
+      setSuccessMessage("");
+      setError(t("comment.author_email_required"));
+      return;
+    }
+
     const payload: CreateCommentRequest = {
-      content,
-      authorName,
-      authorEmail,
-      authorUrl: authorUrl || undefined,
+      content: trimmedContent,
+      authorName: trimmedAuthorName,
+      authorEmail: trimmedAuthorEmail,
+      authorUrl: trimmedAuthorUrl || undefined,
       parentId: replyTarget?.id,
     };
 
     if (rememberInfo) {
-      localStorage.setItem(storageKey, JSON.stringify({ authorName, authorEmail, authorUrl }));
+      localStorage.setItem(storageKey, JSON.stringify({
+        authorName: trimmedAuthorName,
+        authorEmail: trimmedAuthorEmail,
+        authorUrl: trimmedAuthorUrl,
+      }));
     } else {
       localStorage.removeItem(storageKey);
     }
 
+    setIsSubmitting(true);
+    setError("");
+    setSuccessMessage("");
+
     client.comment.create(parseInt(id), payload).then(({ error }) => {
       if (error) {
+        setSuccessMessage("");
         setError(normalizeCommentError(error.value as string, t));
       } else {
         setContent("");
         setError("");
+        setSuccessMessage(t("comment.success"));
         onCancelReply();
-        showAlert(t("comment.success"), () => {
-          onRefresh();
-        });
+        onRefresh();
+        textareaRef.current?.focus();
       }
+    }).finally(() => {
+      setIsSubmitting(false);
     });
   }
 
   return (
-    <div className="w-full rounded-2xl bg-w t-primary p-6 flex flex-col shadow-[0_0_0_1px_rgba(0,0,0,0.04)]">
-      <div className="mb-4 flex w-full flex-col items-start gap-1">
-        <label htmlFor="comment" className="text-3xl font-bold">{t("comment.form.title")}</label>
-        <p className="text-sm text-neutral-500">{t("comment.form.desc")}</p>
+    <div
+      ref={containerRef}
+      className="w-full rounded-[28px] border border-black/10 bg-w p-6 t-primary shadow-[0_24px_70px_-48px_rgba(15,23,42,0.45)] dark:border-white/10"
+    >
+      <div className="mb-5 flex w-full flex-col gap-3 border-b border-black/5 pb-5 dark:border-white/10">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-theme/10 text-theme">
+            <i className="ri-chat-3-line text-lg" />
+          </span>
+          <div className="min-w-0">
+            <label htmlFor="comment" className="text-3xl font-bold tracking-[-0.03em]">{t("comment.form.title")}</label>
+            <p className="text-sm text-neutral-500">{t("comment.form.desc")}</p>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-black/5 bg-black/[0.02] px-4 py-3 text-sm dark:border-white/10 dark:bg-white/[0.03]">
+          <p className="font-medium t-primary">{t("comment.form.required_tip")}</p>
+          <p className="mt-1 t-secondary">{t("comment.form.optional_tip")}</p>
+        </div>
       </div>
+      {successMessage ? (
+        <div className="mb-4 rounded-2xl border border-emerald-200/70 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200" aria-live="polite">
+          {successMessage}
+        </div>
+      ) : null}
+      {error ? (
+        <div className="mb-4 rounded-2xl border border-red-200/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-200" aria-live="polite">
+          {error}
+        </div>
+      ) : null}
       {replyTarget ? (
-        <div className="mb-4 w-full rounded-xl border border-black/5 bg-secondary/40 px-4 py-3">
+        <div className="mb-4 w-full rounded-2xl border border-theme/20 bg-theme/5 px-4 py-3 dark:border-theme/25 dark:bg-theme/10">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold t-primary">
+              <p className="text-sm font-semibold text-theme">
                 {t("comment.reply.replying_to$name", { name: replyTarget.author.name })}
               </p>
-              <p className="truncate text-sm text-neutral-500">{replyTarget.content}</p>
+              <p className="mt-1 truncate text-sm t-secondary">{replyTarget.content}</p>
             </div>
-            <button className="text-sm text-neutral-500 hover:text-neutral-800" onClick={onCancelReply}>
+            <button
+              className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm t-secondary transition-colors hover:bg-black/5 hover:text-neutral-900 dark:hover:bg-white/10 dark:hover:text-white"
+              onClick={onCancelReply}
+              type="button"
+            >
+              <i className="ri-close-line" />
               {t("cancel")}
             </button>
           </div>
         </div>
       ) : null}
-      <textarea
-        id="comment"
-        placeholder={t("comment.placeholder.title")}
-        className="bg-w w-full h-40 rounded-lg border border-black/10 px-4 py-3"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <div className="flex flex-col gap-2">
+        <label htmlFor="comment" className="flex items-center gap-2 text-sm font-medium t-primary">
+          <span>{t("comment.form.content")}</span>
+          <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[11px] font-semibold text-theme">{t("comment.form.required_label")}</span>
+        </label>
+        <textarea
+          ref={textareaRef}
+          id="comment"
+          placeholder={t("comment.placeholder.title")}
+          className="h-40 w-full rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+          value={content}
+          disabled={isSubmitting}
+          required
+          onChange={(e) => {
+            clearFeedback();
+            setContent(e.target.value);
+          }}
+        />
+      </div>
       <div className="mt-4 grid w-full gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">{t("comment.form.author_name")}</label>
-          <input className="rounded-lg border border-black/10 bg-w px-3 py-2" value={authorName} onChange={(e) => setAuthorName(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm font-medium t-primary">
+            <span>{t("comment.form.author_name")}</span>
+            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[11px] font-semibold text-theme">{t("comment.form.required_label")}</span>
+          </label>
+          <input
+            className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+            value={authorName}
+            autoComplete="name"
+            disabled={isSubmitting}
+            required
+            onChange={(e) => {
+              clearFeedback();
+              setAuthorName(e.target.value);
+            }}
+          />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">{t("comment.form.author_email")}</label>
-          <input className="rounded-lg border border-black/10 bg-w px-3 py-2" value={authorEmail} onChange={(e) => setAuthorEmail(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm font-medium t-primary">
+            <span>{t("comment.form.author_email")}</span>
+            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[11px] font-semibold text-theme">{t("comment.form.required_label")}</span>
+          </label>
+          <input
+            className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+            value={authorEmail}
+            type="email"
+            autoComplete="email"
+            disabled={isSubmitting}
+            required
+            onChange={(e) => {
+              clearFeedback();
+              setAuthorEmail(e.target.value);
+            }}
+          />
         </div>
         <div className="flex flex-col gap-2 md:col-span-2">
-          <label className="text-sm font-medium">{t("comment.form.author_url")}</label>
-          <input className="rounded-lg border border-black/10 bg-w px-3 py-2" value={authorUrl} onChange={(e) => setAuthorUrl(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm font-medium t-primary">
+            <span>{t("comment.form.author_url")}</span>
+            <span className="rounded-full bg-black/5 px-2 py-0.5 text-[11px] font-semibold t-secondary dark:bg-white/10">{t("comment.form.optional_label")}</span>
+          </label>
+          <input
+            className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+            value={authorUrl}
+            type="url"
+            autoComplete="url"
+            disabled={isSubmitting}
+            onChange={(e) => {
+              clearFeedback();
+              setAuthorUrl(e.target.value);
+            }}
+          />
         </div>
       </div>
-      <div className="mt-4 flex w-full items-center justify-between gap-4">
-        <label className="flex items-center gap-2 text-sm text-neutral-600">
-          <input type="checkbox" checked={rememberInfo} onChange={(e) => setRememberInfo(e.target.checked)} />
-          {t("comment.form.remember_me")}
-        </label>
-        <button className="bg-theme text-white px-6 py-2 rounded-full" onClick={submit}>
-          {t("comment.submit")}
-        </button>
+      <div className="mt-5 flex w-full flex-col gap-4 border-t border-black/5 pt-4 dark:border-white/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+              <input
+                type="checkbox"
+                checked={rememberInfo}
+                disabled={isSubmitting}
+                onChange={(e) => setRememberInfo(e.target.checked)}
+              />
+              {t("comment.form.remember_me")}
+            </label>
+            <p className="text-xs t-secondary">
+              {isFormComplete ? t("comment.form.ready_hint") : t("comment.form.complete_required")}
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3">
+            {replyTarget ? (
+              <button
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm t-secondary transition-colors hover:bg-black/5 hover:text-neutral-900 dark:hover:bg-white/10 dark:hover:text-white"
+                onClick={onCancelReply}
+                type="button"
+              >
+                <i className="ri-arrow-go-back-line" />
+                {t("cancel")}
+              </button>
+            ) : null}
+            <button
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition ${
+                canSubmit
+                  ? "bg-theme text-white shadow-lg shadow-theme/20 hover:bg-theme-hover active:bg-theme-active"
+                  : "cursor-not-allowed bg-neutral-200 text-neutral-400 dark:bg-white/10 dark:text-neutral-500"
+              }`}
+              disabled={!canSubmit}
+              onClick={submit}
+              type="button"
+            >
+              <i className={`${isSubmitting ? "ri-loader-4-line animate-spin" : "ri-send-plane-2-line"}`} />
+              <span>{t("comment.submit")}</span>
+            </button>
+          </div>
+        </div>
       </div>
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-      <AlertUI />
     </div>
   );
 }
@@ -512,6 +676,7 @@ function Comments({ id }: { id: string }) {
       if (error) {
         setError(error.value as string);
       } else if (data && Array.isArray(data)) {
+        setError(undefined);
         setComments(data as ApiComment[]);
       }
     });
@@ -524,31 +689,46 @@ function Comments({ id }: { id: string }) {
   }, [id]);
 
   const rootComments = comments.filter((comment) => comment.parentId == null);
+  const totalComments = comments.length;
 
   return (
     <>
       {config.getBoolean('comment.enabled') &&
-        <div className="m-2 flex flex-col justify-center items-center">
+        <div className="m-2 mt-8 flex flex-col items-center justify-center">
           <CommentInput id={id} onRefresh={loadComments} replyTarget={replyTarget} onCancelReply={() => setReplyTarget(null)} />
           {error && (
-            <div className="flex flex-col wauto rounded-2xl bg-w t-primary m-2 p-6 items-center justify-center">
-              <h1 className="text-xl font-bold t-primary">{error}</h1>
-              <button className="mt-2 bg-theme text-white px-4 py-2 rounded-full" onClick={loadComments}>
+            <div className="mt-4 flex w-full flex-col items-start justify-center rounded-2xl border border-red-200/70 bg-red-50/80 p-6 text-red-700 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-200">
+              <h1 className="text-xl font-bold">{error}</h1>
+              <button className="mt-3 rounded-full bg-theme px-4 py-2 text-white" onClick={loadComments}>
                 {t("reload")}
               </button>
             </div>
           )}
-          {rootComments.length > 0 && (
-            <div className="w-full">
-              {rootComments.map((comment) => (
-                <CommentThread
-                  key={comment.id}
-                  comment={comment}
-                  replies={comments.filter((item) => item.parentId === comment.id)}
-                  onRefresh={loadComments}
-                  onReply={setReplyTarget}
-                />
-              ))}
+          {!error && (
+            <div className="mt-6 w-full">
+              <div className="mb-4 flex items-end justify-between gap-3 px-1">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-[-0.02em] t-primary">{t("comment.title")}</h2>
+                  <p className="mt-1 text-sm t-secondary">{t("comment.list.count$count", { count: totalComments })}</p>
+                </div>
+              </div>
+              {rootComments.length > 0 ? (
+                <div className="space-y-4">
+                  {rootComments.map((comment) => (
+                    <CommentThread
+                      key={comment.id}
+                      comment={comment}
+                      replies={comments.filter((item) => item.parentId === comment.id)}
+                      onRefresh={loadComments}
+                      onReply={setReplyTarget}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-black/10 bg-black/[0.02] px-6 py-10 text-center dark:border-white/10 dark:bg-white/[0.03]">
+                  <p className="text-base font-medium t-primary">{t("comment.list.empty")}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -569,10 +749,10 @@ function CommentThread({
   onReply: (comment: ApiComment) => void;
 }) {
   return (
-    <div className="mt-3">
+    <div className="space-y-3">
       <CommentItem comment={comment} onRefresh={onRefresh} onReply={onReply} />
       {replies.length > 0 ? (
-        <div className="ml-8 border-l border-black/5 pl-4">
+        <div className="ml-4 space-y-3 border-l border-black/10 pl-4 dark:border-white/10">
           {replies.map((reply) => (
             <CommentItem key={reply.id} comment={reply} onRefresh={onRefresh} onReply={onReply} compact />
           ))}
@@ -616,50 +796,60 @@ function CommentItem({
   }
 
   return (
-    <div className={`flex flex-row items-start rounded-xl mt-2 ${compact ? "bg-secondary/20" : ""}`}>
-      <img src={comment.author.avatar || "/avatar.png"} className="w-8 h-8 rounded-full mt-4 object-cover" />
-      <div className="flex flex-col flex-1 w-0 ml-2 bg-w rounded-xl p-4">
-        <div className="flex flex-row items-center gap-2">
+    <div
+      className={`rounded-2xl border p-4 ${
+        compact
+          ? "border-black/5 bg-black/[0.02] dark:border-white/10 dark:bg-white/[0.03]"
+          : "border-black/10 bg-w shadow-[0_22px_50px_-42px_rgba(15,23,42,0.55)] dark:border-white/10"
+      }`}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
           {comment.author.url ? (
-            <a href={comment.author.url} target="_blank" rel="noreferrer" className="t-primary text-base font-bold hover:underline">
+            <a href={comment.author.url} target="_blank" rel="noreferrer" className="text-base font-bold t-primary hover:text-theme hover:underline">
               {comment.author.name}
             </a>
           ) : (
-            <span className="t-primary text-base font-bold">{comment.author.name}</span>
+            <span className="text-base font-bold t-primary">{comment.author.name}</span>
           )}
           {comment.author.isAdmin ? (
             <span className="rounded-full bg-theme/10 px-2 py-0.5 text-xs font-medium text-theme">{t("admin.title")}</span>
           ) : null}
-          <div className="flex-1 w-0" />
-          <span title={new Date(comment.createdAt).toLocaleString()} className="text-gray-400 text-sm">
+          <span className="hidden text-neutral-300 sm:inline">·</span>
+          <span title={new Date(comment.createdAt).toLocaleString()} className="text-sm t-secondary">
             {timeago(comment.createdAt)}
           </span>
         </div>
         {comment.replyTo ? (
-          <blockquote className="my-2 rounded-lg border-l-4 border-theme/30 bg-secondary/30 px-3 py-2 text-sm text-neutral-600">
-            <p className="font-medium">{t("comment.reply.quote$name", { name: comment.replyTo.authorName })}</p>
+          <blockquote className="rounded-2xl border border-theme/15 bg-theme/5 px-4 py-3 text-sm text-neutral-600 dark:border-theme/20 dark:bg-theme/10 dark:text-neutral-300">
+            <p className="font-medium t-primary">{t("comment.reply.quote$name", { name: comment.replyTo.authorName })}</p>
             <p className="truncate">{comment.replyTo.contentPreview}</p>
           </blockquote>
         ) : null}
-        <p className="t-primary break-words whitespace-pre-wrap">{comment.content}</p>
-        <div className="flex flex-row justify-end">
+        <p className="break-words whitespace-pre-wrap text-[15px] leading-7 t-primary">{comment.content}</p>
+        <div className="flex items-center justify-between gap-3 border-t border-black/5 pt-3 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <button className="px-2 py text-sm text-neutral-500 hover:text-neutral-800" onClick={() => onReply(comment)}>
+            <button
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm t-secondary transition-colors hover:bg-black/5 hover:text-neutral-900 dark:hover:bg-white/10 dark:hover:text-white"
+              onClick={() => onReply(comment)}
+              type="button"
+            >
+              <i className="ri-corner-down-left-line" />
               {t("comment.reply.button")}
             </button>
             {profile?.permission ? (
               <Popup
                 arrow={false}
                 trigger={
-                  <button className="px-2 py bg-secondary rounded-full">
-                    <i className="ri-more-fill t-secondary"></i>
+                  <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] t-secondary transition-colors hover:bg-black/[0.08] hover:text-neutral-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:hover:text-white">
+                    <i className="ri-more-fill"></i>
                   </button>
                 }
                 position="left center"
               >
                 <div className="flex flex-row self-end mr-2">
-                  <button onClick={deleteComment} aria-label={t("delete.comment.title")} className="px-2 py bg-secondary rounded-full">
-                    <i className="ri-delete-bin-2-line t-secondary"></i>
+                  <button type="button" onClick={deleteComment} aria-label={t("delete.comment.title")} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] t-secondary transition-colors hover:bg-black/[0.08] hover:text-neutral-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:hover:text-white">
+                    <i className="ri-delete-bin-2-line"></i>
                   </button>
                 </div>
               </Popup>
