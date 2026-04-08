@@ -65,11 +65,11 @@ export const classicLayoutDefinition: HeaderLayoutDefinition = {
   },
   renderRouteShell({ header, content, footer }) {
     return (
-      <>
+      <div className="flex min-h-screen flex-col">
         {header}
-        {content}
+        <div className="flex-1">{content}</div>
         {footer}
-      </>
+      </div>
     );
   },
 };

@@ -227,7 +227,7 @@ export function MomentsPage() {
                 </PageShell>
             </Waiting>
             
-            <ModalSurface isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="max-w-[min(92vw,50rem)]">
+            <ModalSurface isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} maxWidth="50rem">
                 <div className="w-full">
                     <h2 className="mb-4 text-2xl font-semibold tracking-[-0.03em] t-primary">
                         {editingMoment ? t('moments.edit') : t('moments.publish')}

@@ -33,7 +33,7 @@ export function useAlert() {
     }
     const { t } = useTranslation()
     const AlertUI = () => (
-        <ModalSurface isOpen={isOpen} onRequestClose={close} className="min-w-56 sm:min-w-96">
+        <ModalSurface isOpen={isOpen} onRequestClose={close} className="min-w-56 sm:min-w-96" maxWidth="36rem">
             <div className="flex flex-col items-start space-y-4">
                 <h1 className="text-2xl font-semibold tracking-[-0.03em] t-primary">
                     {t("alert")}
@@ -68,7 +68,7 @@ export function useConfirm() {
     }
     const { t } = useTranslation()
     const ConfirmUI = () => (
-        <ModalSurface isOpen={isOpen} onRequestClose={close} className="min-w-56 sm:min-w-96">
+        <ModalSurface isOpen={isOpen} onRequestClose={close} className="min-w-56 sm:min-w-96" maxWidth="36rem">
             <div className="flex flex-col items-start space-y-4">
                 <h1 className="text-2xl font-semibold tracking-[-0.03em] t-primary">
                     {confirm?.title}

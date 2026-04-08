@@ -699,7 +699,7 @@ export function Settings() {
         </div>
       </main>
 
-      <ModalSurface isOpen={isOpen} onRequestClose={() => setIsOpen(false)} className="max-w-[min(92vw,40rem)]">
+      <ModalSurface isOpen={isOpen} onRequestClose={() => setIsOpen(false)} maxWidth="40rem">
         <div className="flex flex-col items-start">
           <h1 className="text-2xl font-semibold tracking-[-0.03em] t-primary">{t("settings.import_result")}</h1>
           <p className="mt-3 text-base leading-7 dark:text-white">{msg}</p>

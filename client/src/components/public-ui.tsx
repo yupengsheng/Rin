@@ -124,8 +124,7 @@ const modalStyles: Modal.Styles = {
     background: "transparent",
     inset: "auto",
     overflow: "visible",
-    maxWidth: "min(92vw, 56rem)",
-    width: "100%",
+    width: "min(92vw, 40rem)",
   },
   overlay: {
     backgroundColor: "rgba(15, 23, 42, 0.42)",
@@ -140,14 +139,24 @@ export function ModalSurface({
   onRequestClose,
   children,
   className = "",
+  maxWidth = "40rem",
 }: {
   isOpen: boolean;
   onRequestClose: () => void;
   children: ReactNode;
   className?: string;
+  maxWidth?: string;
 }) {
+  const styles: Modal.Styles = {
+    ...modalStyles,
+    content: {
+      ...modalStyles.content,
+      width: `min(92vw, ${maxWidth})`,
+    },
+  };
+
   return (
-    <Modal isOpen={isOpen} shouldCloseOnOverlayClick shouldCloseOnEsc onRequestClose={onRequestClose} style={modalStyles}>
+    <Modal isOpen={isOpen} shouldCloseOnOverlayClick shouldCloseOnEsc onRequestClose={onRequestClose} style={styles}>
       <SurfaceCard className={`w-full p-6 sm:p-7 ${className}`.trim()}>{children}</SurfaceCard>
     </Modal>
   );

@@ -264,7 +264,7 @@ function Friend({ friend }: { friend: FriendItem }) {
                 )}
             </a>
 
-            <ModalSurface isOpen={modalIsOpen} onRequestClose={() => setIsOpen(false)} className="max-w-[min(92vw,34rem)]">
+            <ModalSurface isOpen={modalIsOpen} onRequestClose={() => setIsOpen(false)} maxWidth="34rem">
                 <div className="relative flex w-full flex-col items-center justify-start">
                     <div className="h-16 w-16 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
                         <img className={"h-full w-full object-cover rounded-xl " + (friend.health.length > 0 ? "grayscale" : "")} src={friend.avatar} alt={friend.name} />

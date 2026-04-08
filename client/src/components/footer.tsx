@@ -90,9 +90,9 @@ function Footer() {
                 <link rel="alternate" type="application/atom+xml" title={siteName} href="/atom.xml" />
                 <link rel="alternate" type="application/json" title={siteName} href="/rss.json" />
             </Helmet>
-            <div className="mx-auto mb-8 mt-10 w-full max-w-5xl px-4 ani-show">
-                <SurfaceCard className="p-5 sm:p-6">
-                    <div className="flex flex-col items-center justify-center space-y-4 text-center t-primary">
+            <div className="mx-auto mb-6 mt-8 w-full max-w-3xl px-4 ani-show">
+                <SurfaceCard className="p-4 sm:p-5">
+                    <div className="flex flex-col items-center justify-center space-y-3 text-center t-primary">
                         <div ref={footerHtmlRef} />
                         <p className='text-sm text-neutral-500 font-normal link-line'>
                             <span onDoubleClick={() => {
