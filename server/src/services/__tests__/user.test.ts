@@ -70,6 +70,42 @@ describe('UserService', () => {
             expect(location).toContain('state=');
         });
 
+        it('should include a same-origin callback redirect_uri', async () => {
+            let capturedRedirectUri: string | undefined;
+
+            const appWithOAuthSpy = new Hono<{ Bindings: Env; Variables: Variables }>();
+            appWithOAuthSpy.use(createMiddleware<{ Bindings: Env; Variables: Variables }>(async (c, next) => {
+                c.set('db', db);
+                c.set('cache', new TestCacheImpl());
+                c.set('serverConfig', new TestCacheImpl());
+                c.set('clientConfig', new TestCacheImpl());
+                c.set('jwt', {
+                    sign: async (payload: any) => `mock_token_${payload.id}`,
+                    verify: async (_token: string) => null,
+                } as JWTUtils);
+                c.set('oauth2', {
+                    generateState: () => 'mock_state',
+                    createRedirectUrl: (state: string, _provider: string, redirectUri?: string) => {
+                        capturedRedirectUri = redirectUri;
+                        return `https://github.com/login?state=${state}&redirect_uri=${encodeURIComponent(redirectUri || '')}`;
+                    },
+                    authorize: async (_provider: string, code: string) => code === 'valid_code' ? { accessToken: 'gh_token' } : null,
+                } as OAuth2Utils);
+                c.set('env', env);
+                await next();
+            }));
+            appWithOAuthSpy.route('/api/user', UserService());
+
+            const res = await appWithOAuthSpy.request('http://localhost/api/user/github', {
+                method: 'GET',
+                headers: { 'Referer': 'https://blog.yups.fun/login' }
+            }, env);
+
+            expect(res.status).toBe(302);
+            expect(capturedRedirectUri).toBe('http://localhost/api/user/github/callback');
+            expect(res.headers.get('Location')).toContain(encodeURIComponent('http://localhost/api/user/github/callback'));
+        });
+
         it('should require referer header', async () => {
             const res = await app.request('/github', { method: 'GET' }, env);
             
@@ -145,6 +181,56 @@ describe('UserService', () => {
     });
 
     describe('GET /github/callback - GitHub OAuth callback', () => {
+        it('should exchange code with the same callback redirect_uri', async () => {
+            let capturedRedirectUri: string | undefined;
+            const originalFetch = global.fetch;
+            global.fetch = async () => {
+                return new Response(JSON.stringify({
+                    id: 'gh_123',
+                    login: 'user1',
+                    name: 'User One',
+                    avatar_url: 'https://github.com/avatar.png'
+                }), { status: 200 });
+            };
+
+            const appWithOAuthSpy = new Hono<{ Bindings: Env; Variables: Variables }>();
+            appWithOAuthSpy.use(createMiddleware<{ Bindings: Env; Variables: Variables }>(async (c, next) => {
+                c.set('db', db);
+                c.set('cache', new TestCacheImpl());
+                c.set('serverConfig', new TestCacheImpl());
+                c.set('clientConfig', new TestCacheImpl());
+                c.set('jwt', {
+                    sign: async (payload: any) => `mock_token_${payload.id}`,
+                    verify: async (_token: string) => null,
+                } as JWTUtils);
+                c.set('oauth2', {
+                    generateState: () => 'mock_state',
+                    createRedirectUrl: (state: string, _provider: string, redirectUri?: string) => `https://github.com/login?state=${state}&redirect_uri=${encodeURIComponent(redirectUri || '')}`,
+                    authorize: async (_provider: string, code: string, redirectUri?: string) => {
+                        capturedRedirectUri = redirectUri;
+                        return code === 'valid_code' ? { accessToken: 'gh_token' } : null;
+                    },
+                } as OAuth2Utils);
+                c.set('env', env);
+                await next();
+            }));
+            appWithOAuthSpy.route('/api/user', UserService());
+
+            try {
+                const res = await appWithOAuthSpy.request('https://blog.yups.fun/api/user/github/callback?code=valid_code&state=mock_state', {
+                    method: 'GET',
+                    headers: {
+                        'Cookie': 'state=mock_state; redirect_to=https://blog.yups.fun/callback'
+                    }
+                }, env);
+
+                expect(res.status).toBe(302);
+                expect(capturedRedirectUri).toBe('https://blog.yups.fun/api/user/github/callback');
+            } finally {
+                global.fetch = originalFetch;
+            }
+        });
+
         it('should authenticate existing user', async () => {
             const originalFetch = global.fetch;
             global.fetch = async () => {

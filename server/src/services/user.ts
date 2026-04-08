@@ -32,6 +32,7 @@ export function UserService(): Hono {
         // Build callback URL from referer
         const refererUrl = new URL(referer);
         const callbackUrl = new URL('/callback', refererUrl.origin);
+        const oauthCallbackUrl = new URL(`${c.req.path.replace(/\/$/, "")}/callback`, c.req.url);
 
         setCookie(c, 'redirect_to', callbackUrl.toString(), {
             path: '/',
@@ -42,7 +43,7 @@ export function UserService(): Hono {
             path: '/',
         });
 
-        return c.redirect(oauth2.createRedirectUrl(genState, "GitHub"), 302);
+        return c.redirect(oauth2.createRedirectUrl(genState, "GitHub", oauthCallbackUrl.toString()), 302);
     });
 
     // GET /user/github/callback - GitHub OAuth callback
@@ -57,6 +58,8 @@ export function UserService(): Hono {
 
         const query = c.req.query();
         const stateCookie = getCookie(c, 'state');
+        const oauthCallbackUrl = new URL(c.req.url);
+        oauthCallbackUrl.search = '';
 
         console.log('param_state', query.state);
         console.log('cookie_state', stateCookie);
@@ -70,7 +73,7 @@ export function UserService(): Hono {
         deleteCookie(c, 'state');
 
         // Exchange code for access token
-        const gh_token = await profileAsync(c, 'user_oauth_authorize', () => oauth2.authorize("GitHub", query.code));
+        const gh_token = await profileAsync(c, 'user_oauth_authorize', () => oauth2.authorize("GitHub", query.code, oauthCallbackUrl.toString()));
         if (!gh_token) {
             throw new BadRequestError('Failed to authorize with GitHub');
         }

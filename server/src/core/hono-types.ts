@@ -11,8 +11,8 @@ export interface JWTUtils {
 
 export interface OAuth2Utils {
     generateState(): string;
-    createRedirectUrl(state: string, provider: string): string;
-    authorize(provider: string, code: string): Promise<{ accessToken: string } | null>;
+    createRedirectUrl(state: string, provider: string, redirectUri?: string): string;
+    authorize(provider: string, code: string, redirectUri?: string): Promise<{ accessToken: string } | null>;
 }
 
 export interface CacheImpl {
