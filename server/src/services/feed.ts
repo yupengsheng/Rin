@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, like, lt, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, like, lt, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import type { Variables } from "../core/hono-types";
 import { profileAsync } from "../core/server-timing";
@@ -502,47 +502,151 @@ export function SearchService(): Hono<{
             return c.json({ size: 0, data: [], hasNext: false });
         }
 
-        const cacheKey = `search_${keyword}`;
-        const searchKeyword = `%${keyword}%`;
-        const whereClause = or(
-            like(feeds.title, searchKeyword),
-            like(feeds.content, searchKeyword),
-            like(feeds.summary, searchKeyword),
-            like(feeds.alias, searchKeyword)
-        );
+        const cacheKey = `search_${admin ? "admin" : "public"}_${keyword}_${page_num}_${limit_num}`;
 
-        const feed_list = (await profileAsync(c, 'feed_search_cache_db', () => cache.getOrSet(cacheKey, () => db.query.feeds.findMany({
-            where: admin ? whereClause : and(whereClause, eq(feeds.draft, 0)),
-            columns: admin ? undefined : { draft: false, listed: false },
-            with: {
-                hashtags: {
-                    columns: {},
-                    with: { hashtag: { columns: { id: true, name: true } } }
-                },
-                user: { columns: { id: true, username: true, avatar: true } }
-            },
-            orderBy: [desc(feeds.createdAt), desc(feeds.updatedAt)],
-        })))).map(({ content, hashtags, summary, ...other }: any) => {
-            return {
-                summary: summary.length > 0 ? summary : content.length > 100 ? content.slice(0, 100) : content,
-                hashtags: hashtags.map(({ hashtag }: any) => hashtag),
-                ...other
-            };
-        });
+        try {
+            const data = await profileAsync(c, 'feed_search_cache_db', () => cache.getOrSet(cacheKey, async () => {
+                const ftsQuery = buildFtsQuery(keyword);
+                if (!ftsQuery) {
+                    return { size: 0, data: [], hasNext: false };
+                }
 
-        if (feed_list.length <= page_num * limit_num) {
-            return c.json({ size: feed_list.length, data: [], hasNext: false });
-        } else if (feed_list.length <= page_num * limit_num + limit_num) {
-            return c.json({ size: feed_list.length, data: feed_list.slice(page_num * limit_num), hasNext: false });
-        } else {
-            return c.json({
-                size: feed_list.length,
-                data: feed_list.slice(page_num * limit_num, page_num * limit_num + limit_num),
-                hasNext: true
-            });
+                const visibilityClause = admin
+                    ? sql``
+                    : sql`AND f.draft = 0 AND f.listed = 1`;
+
+                const totalRows = await db.all<{ count: number }>(sql`
+                    SELECT COUNT(*) AS count
+                    FROM feeds_search
+                    JOIN feeds f ON f.id = feeds_search.rowid
+                    WHERE feeds_search MATCH ${ftsQuery}
+                    ${visibilityClause}
+                `);
+
+                const totalRow = totalRows[0] as any;
+                const total = Number(Array.isArray(totalRow) ? totalRow[0] : totalRow?.count ?? 0);
+                if (total === 0) {
+                    return { size: 0, data: [], hasNext: false };
+                }
+
+                const matchedRows = await db.all<{ id: number }>(sql`
+                    SELECT f.id AS id
+                    FROM feeds_search
+                    JOIN feeds f ON f.id = feeds_search.rowid
+                    WHERE feeds_search MATCH ${ftsQuery}
+                    ${visibilityClause}
+                    ORDER BY bm25(feeds_search, 5.0, 3.0, 1.0, 8.0), f.created_at DESC, f.updated_at DESC
+                    LIMIT ${limit_num}
+                    OFFSET ${page_num * limit_num}
+                `);
+
+                const ids = matchedRows.map((row) => Number(row.id)).filter((id) => !Number.isNaN(id));
+                if (ids.length === 0) {
+                    return { size: total, data: [], hasNext: false };
+                }
+
+                const matchedFeeds = await db.query.feeds.findMany({
+                    where: inArray(feeds.id, ids),
+                    columns: admin ? undefined : { draft: false, listed: false },
+                    with: {
+                        hashtags: {
+                            columns: {},
+                            with: { hashtag: { columns: { id: true, name: true } } }
+                        },
+                    },
+                });
+
+                const idOrder = new Map(ids.map((id, index) => [id, index]));
+                const data = matchedFeeds
+                    .map(({ content, hashtags, summary, ...other }: any) => ({
+                        summary: summary.length > 0 ? summary : content.length > 100 ? content.slice(0, 100) : content,
+                        hashtags: hashtags.map(({ hashtag }: any) => hashtag),
+                        ...other,
+                    }))
+                    .sort((left: any, right: any) => (idOrder.get(left.id) ?? 0) - (idOrder.get(right.id) ?? 0));
+
+                return {
+                    size: total,
+                    data,
+                    hasNext: total > page_num * limit_num + ids.length,
+                };
+            }));
+
+            return c.json(data);
+        } catch (error) {
+            console.warn("FTS search unavailable, falling back to LIKE search", error);
+            return c.json(await searchFeedsFallback({ db, cache, admin, keyword, page_num, limit_num }));
         }
     });
     return app;
+}
+
+function buildFtsQuery(keyword: string) {
+    const terms = keyword
+        .trim()
+        .split(/\s+/)
+        .map((term) => term.trim())
+        .filter(Boolean)
+        .map((term) => `"${term.replace(/"/g, '""')}"`);
+
+    return terms.join(" AND ");
+}
+
+async function searchFeedsFallback({
+    db,
+    cache,
+    admin,
+    keyword,
+    page_num,
+    limit_num,
+}: {
+    db: any;
+    cache: any;
+    admin: boolean;
+    keyword: string;
+    page_num: number;
+    limit_num: number;
+}) {
+    const fallbackCacheKey = `search_fallback_${admin ? "admin" : "public"}_${keyword}`;
+    const searchKeyword = `%${keyword}%`;
+    const whereClause = or(
+        like(feeds.title, searchKeyword),
+        like(feeds.content, searchKeyword),
+        like(feeds.summary, searchKeyword),
+        like(feeds.alias, searchKeyword)
+    );
+
+    const cachedFeedList = await cache.getOrSet(fallbackCacheKey, () => db.query.feeds.findMany({
+        where: admin ? whereClause : and(whereClause, eq(feeds.draft, 0), eq(feeds.listed, 1)),
+        columns: admin ? undefined : { draft: false, listed: false },
+        with: {
+            hashtags: {
+                columns: {},
+                with: { hashtag: { columns: { id: true, name: true } } }
+            },
+        },
+        orderBy: [desc(feeds.createdAt), desc(feeds.updatedAt)],
+    }));
+
+    const feed_list = cachedFeedList.map(({ content, hashtags, summary, ...other }: any) => {
+        return {
+            summary: summary.length > 0 ? summary : content.length > 100 ? content.slice(0, 100) : content,
+            hashtags: hashtags.map(({ hashtag }: any) => hashtag),
+            ...other
+        };
+    });
+
+    if (feed_list.length <= page_num * limit_num) {
+        return { size: feed_list.length, data: [], hasNext: false };
+    } else if (feed_list.length <= page_num * limit_num + limit_num) {
+        return { size: feed_list.length, data: feed_list.slice(page_num * limit_num), hasNext: false };
+    } else {
+        return {
+            size: feed_list.length,
+            data: feed_list.slice(page_num * limit_num, page_num * limit_num + limit_num),
+            hasNext: true
+        };
+    }
 }
 
 
@@ -660,4 +764,3 @@ type FeedItem = {
     updatedAt: Date;
     tags?: string[];
 }
-

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useContext, useEffect } from "react";
+import { Suspense, lazy, useContext, useEffect } from "react";
 import type { DefaultParams, PathPattern } from "wouter";
 import { Route, Switch, useLocation } from "wouter";
 import { AdminLayout } from "../components/admin-layout";
@@ -7,27 +7,30 @@ import Footer from "../components/footer";
 import { Header } from "../components/header";
 import { Padding } from "../components/padding";
 import { getHeaderLayoutDefinition } from "../components/site-header/layout-registry";
+import { TOCHeader } from "../components/toc-header";
+import { Waiting } from "../components/loading";
 import useTableOfContents from "../hooks/useTableOfContents";
 import { useSiteConfig } from "../hooks/useSiteConfig";
-import { CallbackPage } from "../page/callback";
-import { CompatTasksPage } from "../page/compat-tasks";
 import { ErrorPage } from "../page/error";
-import { FeedPage, TOCHeader } from "../page/feed";
-import { FeedsPage } from "../page/feeds";
-import { FriendsPage } from "../page/friends";
-import { HealthPage } from "../page/health";
-import { HashtagPage } from "../page/hashtag";
-import { HashtagsPage } from "../page/hashtags";
-import { LoginPage } from "../page/login";
-import { MomentsPage } from "../page/moments";
-import { QueueStatusPage } from "../page/queue-status";
-import { SearchPage } from "../page/search";
-import { Settings } from "../page/settings";
-import { TimelinePage } from "../page/timeline";
-import { WritingPage } from "../page/writing";
 import { ProfileContext } from "../state/profile";
 import { tryInt } from "../utils/int";
 import { useTranslation } from "react-i18next";
+
+const CallbackPage = lazy(() => import("../page/callback").then((module) => ({ default: module.CallbackPage })));
+const CompatTasksPage = lazy(() => import("../page/compat-tasks").then((module) => ({ default: module.CompatTasksPage })));
+const FeedPage = lazy(() => import("../page/feed").then((module) => ({ default: module.FeedPage })));
+const FeedsPage = lazy(() => import("../page/feeds").then((module) => ({ default: module.FeedsPage })));
+const FriendsPage = lazy(() => import("../page/friends").then((module) => ({ default: module.FriendsPage })));
+const HealthPage = lazy(() => import("../page/health").then((module) => ({ default: module.HealthPage })));
+const HashtagPage = lazy(() => import("../page/hashtag").then((module) => ({ default: module.HashtagPage })));
+const HashtagsPage = lazy(() => import("../page/hashtags").then((module) => ({ default: module.HashtagsPage })));
+const LoginPage = lazy(() => import("../page/login").then((module) => ({ default: module.LoginPage })));
+const MomentsPage = lazy(() => import("../page/moments").then((module) => ({ default: module.MomentsPage })));
+const QueueStatusPage = lazy(() => import("../page/queue-status").then((module) => ({ default: module.QueueStatusPage })));
+const SearchPage = lazy(() => import("../page/search").then((module) => ({ default: module.SearchPage })));
+const Settings = lazy(() => import("../page/settings").then((module) => ({ default: module.Settings })));
+const TimelinePage = lazy(() => import("../page/timeline").then((module) => ({ default: module.TimelinePage })));
+const WritingPage = lazy(() => import("../page/writing").then((module) => ({ default: module.WritingPage })));
 
 export function AppRoutes() {
   const { t } = useTranslation();
@@ -156,7 +159,11 @@ function AppRoute({
 
         return layoutDefinition.renderRouteShell({
           header: <Header>{headerComponent}</Header>,
-          content: <Padding className={paddingClassName}>{resolvedContent}</Padding>,
+          content: (
+            <Padding className={paddingClassName}>
+              <Suspense fallback={<Waiting for={false} />}>{resolvedContent}</Suspense>
+            </Padding>
+          ),
           footer: <Footer />,
           paddingClassName,
         });
@@ -187,7 +194,7 @@ function AdminRoute({
     <Route path={path}>
       {(params) => (
         <AdminLayout title={title} description={description}>
-          {typeof content === "function" ? content(params) : content}
+          <Suspense fallback={<Waiting for={false} />}>{typeof content === "function" ? content(params) : content}</Suspense>
         </AdminLayout>
       )}
     </Route>

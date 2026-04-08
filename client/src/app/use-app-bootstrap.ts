@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ConfigWrapper } from "@rin/config";
 import type { Profile } from "../state/profile";
 import { defaultClientConfig } from "../state/config";
+import { getAuthToken } from "../utils/auth";
 import { applyThemeColor } from "../utils/theme-color";
 import { readBootstrappedClientConfig } from "./bootstrap-config";
 import { client } from "./runtime";
@@ -51,18 +52,23 @@ export function useAppBootstrap() {
       };
     }
 
-    client.user.profile().then(({ data, error }) => {
-      if (data) {
-        setProfile({
-          id: data.id,
-          avatar: data.avatar || "",
-          permission: data.permission,
-          name: data.username,
-        });
-      } else if (error) {
-        setProfile(null);
-      }
-    });
+    const token = getAuthToken();
+    if (!token) {
+      setProfile(null);
+    } else {
+      client.user.profile().then(({ data, error }) => {
+        if (data) {
+          setProfile({
+            id: data.id,
+            avatar: data.avatar || "",
+            permission: data.permission,
+            name: data.username,
+          });
+        } else if (error) {
+          setProfile(null);
+        }
+      });
+    }
 
     const cachedConfig = sessionStorage.getItem("config");
     const bootstrappedConfig = readBootstrappedClientConfig();
