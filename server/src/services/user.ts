@@ -32,7 +32,7 @@ export function UserService(): Hono {
         // Build callback URL from referer
         const refererUrl = new URL(referer);
         const callbackUrl = new URL('/callback', refererUrl.origin);
-        const oauthCallbackUrl = new URL(`${c.req.path.replace(/\/$/, "")}/callback`, c.req.url);
+        const oauthCallbackUrl = new URL('/api/user/github/callback', c.req.url);
 
         setCookie(c, 'redirect_to', callbackUrl.toString(), {
             path: '/',
