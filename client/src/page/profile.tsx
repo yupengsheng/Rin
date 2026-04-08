@@ -3,8 +3,9 @@ import { useContext, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { ButtonWithLoading } from "../components/button";
 import { client } from "../app/runtime";
-import { ImageUploadInput } from "../components/image-upload-input";
+    import { ImageUploadInput } from "../components/image-upload-input";
 import { Input } from "../components/input";
+import { FeedbackBanner, PageIntro, PageShell, SurfaceCard } from "../components/public-ui";
 import { ProfileContext } from "../state/profile";
 
 
@@ -69,9 +70,11 @@ export function ProfilePage() {
 
     if (profile === undefined) {
         return (
-            <div className="py-8 px-4 my-32 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme"></div>
-            </div>
+            <PageShell className="py-20">
+                <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme"></div>
+                </div>
+            </PageShell>
         );
     }
 
@@ -80,62 +83,57 @@ export function ProfilePage() {
     }
 
     return (
-        <div className="py-8 px-4 my-8">
-            <div className="max-w-2xl mx-auto bg-w rounded-2xl shadow-lg p-8">
-                <h1 className="text-2xl font-bold mb-8 t-primary">{t('profile.title')}</h1>
+        <PageShell className="py-10">
+            <div className="mx-auto max-w-3xl space-y-6">
+                <PageIntro
+                    eyebrow={t('profile.title')}
+                    title={t('profile.title')}
+                    description={t('profile.avatar_hint')}
+                />
+                <SurfaceCard className="p-8 sm:p-10">
+                    <div className="space-y-6">
+                        {error ? <FeedbackBanner tone="danger">{error}</FeedbackBanner> : null}
+                        {success ? <FeedbackBanner tone="success">{success}</FeedbackBanner> : null}
 
-                {/* Error message */}
-                {error && (
-                    <p className="text-sm text-red-500 mb-4">{error}</p>
-                )}
+                        <div className="flex flex-col items-start space-y-4">
+                            <label className="text-sm font-medium t-secondary">{t('profile.avatar')}</label>
+                            <div className="w-full max-w-xl">
+                                <ImageUploadInput
+                                    value={avatar}
+                                    onChange={(value) => {
+                                        setError('');
+                                        setAvatar(value);
+                                    }}
+                                    onError={setError}
+                                    disabled={isLoading}
+                                    shape="circle"
+                                    maxFileSize={2 * 1024 * 1024}
+                                    placeholder={t('upload.image.url_placeholder')}
+                                />
+                            </div>
+                        </div>
 
-                {/* Success message */}
-                {success && (
-                    <p className="text-sm text-green-500 mb-4">{success}</p>
-                )}
-
-                <div className="space-y-6">
-                    {/* Avatar section */}
-                    <div className="flex flex-col items-start space-y-4">
-                        <label className="text-sm font-medium t-secondary">{t('profile.avatar')}</label>
-                        <div className="w-full max-w-xl">
-                            <ImageUploadInput
-                                value={avatar}
-                                onChange={(value) => {
-                                    setError('');
-                                    setAvatar(value);
-                                }}
-                                onError={setError}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium t-secondary">{t('profile.username')}</label>
+                            <Input
+                                value={username}
+                                setValue={setUsername}
+                                placeholder={t('profile.username_placeholder')}
                                 disabled={isLoading}
-                                shape="circle"
-                                maxFileSize={2 * 1024 * 1024}
-                                placeholder={t('upload.image.url_placeholder')}
+                                className="rounded-2xl py-3"
                             />
                         </div>
-                        <p className="text-left text-xs t-secondary">{t('profile.avatar_hint')}</p>
-                    </div>
 
-                    {/* Username section */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium t-secondary">{t('profile.username')}</label>
-                        <Input
-                            value={username}
-                            setValue={setUsername}
-                            placeholder={t('profile.username_placeholder')}
-                            disabled={isLoading}
-                        />
+                        <div className="pt-2">
+                            <ButtonWithLoading
+                                title={isLoading ? t('profile.saving') : t('profile.save')}
+                                onClick={handleSubmit}
+                                loading={isLoading}
+                            />
+                        </div>
                     </div>
-
-                    {/* Submit button */}
-                    <div className="pt-4">
-                        <ButtonWithLoading
-                            title={isLoading ? t('profile.saving') : t('profile.save')}
-                            onClick={handleSubmit}
-                            loading={isLoading}
-                        />
-                    </div>
-                </div>
+                </SurfaceCard>
             </div>
-        </div>
+        </PageShell>
     );
 }

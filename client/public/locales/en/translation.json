@@ -66,10 +66,14 @@
       "title": "Delete Article"
     },
     "search": {
+      "empty_description$keyword": "No published posts matched “{{keyword}}”. Try another keyword or broader phrase.",
+      "empty_title": "No matching posts",
       "placeholder": "Please enter keywords",
       "title": "Search",
       "title$keyword": "Search: {{keyword}}"
     },
+    "empty_description": "There is nothing here yet. Publish something and it will show up here.",
+    "empty_title": "No posts yet",
     "title": "Articles",
     "top": {
       "confirm": "Are you sure you want to top this article?",
@@ -103,6 +107,7 @@
       "complete_required": "Complete the required fields to publish your comment",
       "content": "Comment",
       "desc": "Leave your comment below. Reply and quote are supported.",
+      "email_private": "Will not be shown publicly",
       "optional_label": "Optional",
       "optional_tip": "Website is optional and only used to link your homepage",
       "ready_hint": "Required fields complete. Ready to publish.",
@@ -175,6 +180,8 @@
   "friends": {
     "apply": "Apply for Friend Link",
     "create": "Create Friend Link",
+    "empty_description": "There are no friend links to show yet. Add one to start building the circle.",
+    "empty_title": "No friend links yet",
     "left": "Left temporarily",
     "my_apply": "My Applications",
     "review": {
@@ -219,6 +226,8 @@
   "logout": "Logout",
   "main_content": "Main content",
   "moments": {
+    "empty_description": "Short thoughts and status updates will appear here once published.",
+    "empty_title": "No moments yet",
     "edit": "Edit Moment",
     "publish": "Publish Moment",
     "title": "Moments",

@@ -10,6 +10,7 @@ import { useSiteConfig } from "../hooks/useSiteConfig";
 import { siteName } from "../utils/constants"
 import { tryInt } from "../utils/int"
 import { useTranslation } from "react-i18next";
+import { EmptyState, PageIntro, PageShell, SurfaceCard } from "../components/public-ui";
 
 type FeedsData = {
     size: number,
@@ -37,7 +38,7 @@ export function FeedsPage() {
     })
     const page = tryInt(1, query.get("page"))
     const limit = tryInt(siteConfig.pageSize, query.get("limit"))
-    const feedListClass = siteConfig.feedLayout === "masonry" ? "wauto columns-1 gap-5 ani-show md:columns-2" : "wauto flex flex-col ani-show";
+    const feedListClass = siteConfig.feedLayout === "masonry" ? "columns-1 gap-5 ani-show md:columns-2" : "flex flex-col ani-show";
     const ref = useRef("")
     function fetchFeeds(type: FeedType) {
         client.feed.list({
@@ -76,50 +77,56 @@ export function FeedsPage() {
                 <meta property="og:url" content={document.URL} />
             </Helmet>
             <Waiting for={feeds.draft.size + feeds.normal.size + feeds.unlisted.size > 0 || status === 'idle'}>
-                <main className="w-full flex flex-col justify-center items-center mb-8">
-                    <div className="wauto text-start text-black dark:text-white py-4 text-4xl font-bold">
-                        <p>
-                            {listState === 'draft' ? t('draft_bin') : listState === 'normal' ? t('article.title') : t('unlisted')}
-                        </p>
-                        <div className="flex flex-row justify-between">
-                            <p className="text-sm mt-4 text-neutral-500 font-normal">
-                                {t('article.total$count', { count: feeds[listState]?.size })}
-                            </p>
-                            {profile?.permission &&
-                                <div className="flex flex-row space-x-4">
-                                    <Link href={listState === 'draft' ? '/?type=normal' : '/?type=draft'} className={`text-sm mt-4 text-neutral-500 font-normal ${listState === 'draft' ? "text-theme" : ""}`}>
+                <PageShell>
+                    <div className="mx-auto w-full max-w-5xl space-y-6">
+                        <PageIntro
+                            eyebrow={t('article.title')}
+                            title={listState === 'draft' ? t('draft_bin') : listState === 'normal' ? t('article.title') : t('unlisted')}
+                            description={t('article.total$count', { count: feeds[listState]?.size })}
+                            action={profile?.permission ? (
+                                <div className="flex flex-row gap-2 rounded-full border border-black/10 bg-w p-1 dark:border-white/10">
+                                    <Link href={listState === 'draft' ? '/?type=normal' : '/?type=draft'} className={`rounded-full px-3 py-1.5 text-sm transition-colors ${listState === 'draft' ? "bg-theme text-white" : "t-secondary hover:bg-black/5 dark:hover:bg-white/10"}`}>
                                         {t('draft_bin')}
                                     </Link>
-                                    <Link href={listState === 'unlisted' ? '/?type=normal' : '/?type=unlisted'} className={`text-sm mt-4 text-neutral-500 font-normal ${listState === 'unlisted' ? "text-theme" : ""}`}>
+                                    <Link href={listState === 'unlisted' ? '/?type=normal' : '/?type=unlisted'} className={`rounded-full px-3 py-1.5 text-sm transition-colors ${listState === 'unlisted' ? "bg-theme text-white" : "t-secondary hover:bg-black/5 dark:hover:bg-white/10"}`}>
                                         {t('unlisted')}
                                     </Link>
                                 </div>
-                            }
-                        </div>
+                            ) : undefined}
+                        />
+                        <Waiting for={status === 'idle'}>
+                            <SurfaceCard className="p-5 sm:p-6">
+                                {feeds[listState].data.length ? (
+                                    <div className={feedListClass}>
+                                        {feeds[listState].data.map(({ id, ...feed }: any) => (
+                                            <FeedCard key={id} id={id} {...feed} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <EmptyState
+                                        title={t("article.empty_title")}
+                                        description={t("article.empty_description")}
+                                    />
+                                )}
+                                <div className="mt-6 flex flex-row items-center ani-show">
+                                    {page > 1 &&
+                                        <Link href={`/?type=${listState}&page=${(page - 1)}`}
+                                            className={`text-sm font-normal rounded-full px-4 py-2 text-white bg-theme`}>
+                                            {t('previous')}
+                                        </Link>
+                                    }
+                                    <div className="flex-1" />
+                                    {feeds[listState]?.hasNext &&
+                                        <Link href={`/?type=${listState}&page=${(page + 1)}`}
+                                            className={`text-sm font-normal rounded-full px-4 py-2 text-white bg-theme`}>
+                                            {t('next')}
+                                        </Link>
+                                    }
+                                </div>
+                            </SurfaceCard>
+                        </Waiting>
                     </div>
-                    <Waiting for={status === 'idle'}>
-                        <div className={feedListClass}>
-                            {feeds[listState].data.map(({ id, ...feed }: any) => (
-                                <FeedCard key={id} id={id} {...feed} />
-                            ))}
-                        </div>
-                        <div className="wauto flex flex-row items-center mt-4 ani-show">
-                            {page > 1 &&
-                                <Link href={`/?type=${listState}&page=${(page - 1)}`}
-                                    className={`text-sm font-normal rounded-full px-4 py-2 text-white bg-theme`}>
-                                    {t('previous')}
-                                </Link>
-                            }
-                            <div className="flex-1" />
-                            {feeds[listState]?.hasNext &&
-                                <Link href={`/?type=${listState}&page=${(page + 1)}`}
-                                    className={`text-sm font-normal rounded-full px-4 py-2 text-white bg-theme`}>
-                                    {t('next')}
-                                </Link>
-                            }
-                        </div>
-                    </Waiting>
-                </main>
+                </PageShell>
             </Waiting>
         </>
     )

@@ -9,10 +9,10 @@ import { ProfileContext } from "../state/profile"
 import { tryInt } from "../utils/int"
 import { useSearch } from "wouter"
 import { useAlert, useConfirm } from "../components/dialog"
-import Modal from "react-modal"
 import { MarkdownEditor } from "../components/markdown_editor"
 import { Waiting } from "../components/loading"
 import { MomentItem } from "../components/moment_item"
+import { EmptyState, ModalSurface, PageIntro, PageShell, SurfaceCard } from "../components/public-ui"
 
 interface Moment {
     id: number;
@@ -172,89 +172,64 @@ export function MomentsPage() {
                 <meta property="og:url" content={document.URL} />
             </Helmet>
             <Waiting for={!loading}>
-                <main className="w-full flex flex-col justify-center items-center mb-8 ani-show">
-                    <div className="wauto text-start text-black dark:text-white py-4 text-4xl font-bold">
-                        <p>
-                            {t('moments.title')}
-                        </p>
-                        <div className="flex flex-row justify-between items-center">
-                            <p className="text-sm mt-4 text-neutral-500 font-normal">
-                                {t('moments.total$count', { count: length })}
-                            </p>
-                            {profile?.permission && (
-                                <button 
+                <PageShell className="ani-show">
+                    <div className="mx-auto w-full max-w-4xl space-y-6">
+                        <PageIntro
+                            eyebrow={t('moments.title')}
+                            title={t('moments.title')}
+                            description={t('moments.total$count', { count: length })}
+                            action={profile?.permission ? (
+                                <button
                                     onClick={openCreateModal}
                                     className="text-sm font-normal rounded-full px-4 py-2 text-white bg-theme"
                                 >
                                     {t('publish.title')}
                                 </button>
+                            ) : undefined}
+                        />
+
+                        <SurfaceCard className="p-5 sm:p-6">
+                            {moments && moments.length > 0 ? (
+                                <div className="space-y-6">
+                                    {moments.map((moment) => (
+                                        <MomentItem 
+                                            key={moment.id} 
+                                            moment={moment} 
+                                            onDelete={handleDelete}
+                                            onEdit={handleEdit}
+                                            canManage={profile?.permission || false}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <EmptyState
+                                    title={t("moments.empty_title")}
+                                    description={t("moments.empty_description")}
+                                />
                             )}
-                        </div>
+                            
+                            <Waiting for={!loadingMore}>
+                                <div className="py-4 text-center">
+                                    {!hasNextPage && moments && moments.length > 0 ? (
+                                        <div className="pt-6 text-gray-500">{t('no_more')}</div>
+                                    ) : hasNextPage ? (
+                                        <button
+                                            onClick={loadMore}
+                                            className="text-sm font-normal rounded-full px-4 py-2 text-white bg-theme"
+                                        >
+                                            {t('load_more')}
+                                        </button>
+                                    ) : null}
+                                </div>
+                            </Waiting>
+                        </SurfaceCard>
                     </div>
-                    
-                    <div className="wauto">
-                        {moments && moments.length > 0 ? (
-                            <div className="space-y-6">
-                                {moments.map((moment) => (
-                                    <MomentItem 
-                                        key={moment.id} 
-                                        moment={moment} 
-                                        onDelete={handleDelete}
-                                        onEdit={handleEdit}
-                                        canManage={profile?.permission || false}
-                                    />
-                                ))}
-                            </div>
-                        ) : null}
-                        
-                        <Waiting for={!loadingMore}>
-                            <div className="py-4 text-center">
-                                {!hasNextPage && moments && moments.length > 0 ? (
-                                    <div className="text-gray-500 pt-6">{t('no_more')}</div>
-                                ) : hasNextPage ? (
-                                    <button
-                                        onClick={loadMore}
-                                        className="text-sm font-normal rounded-full px-4 py-2 text-white bg-theme"
-                                    >
-                                        {t('load_more')}
-                                    </button>
-                                ) : null}
-                            </div>
-                        </Waiting>
-                    </div>
-                </main>
+                </PageShell>
             </Waiting>
             
-            <Modal 
-                isOpen={isModalOpen}
-                onRequestClose={() => setIsModalOpen(false)}
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        padding: '0',
-                        border: 'none',
-                        borderRadius: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: 'transparent',
-                        maxWidth: '90%',
-                        width: '800px'
-                    },
-                    overlay: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        zIndex: 1000
-                    }
-                }}
-            >
-                <div className="w-full bg-w p-4 rounded-2xl shadow-xl">
-                    <h2 className="text-2xl font-bold mb-4 t-primary">
+            <ModalSurface isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="max-w-[min(92vw,50rem)]">
+                <div className="w-full">
+                    <h2 className="mb-4 text-2xl font-semibold tracking-[-0.03em] t-primary">
                         {editingMoment ? t('moments.edit') : t('moments.publish')}
                     </h2>
                     
@@ -269,20 +244,20 @@ export function MomentsPage() {
                     <div className="flex justify-end mt-4 space-x-2">
                         <button
                             onClick={() => setIsModalOpen(false)}
-                            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white rounded-lg"
+                            className="rounded-full bg-gray-200 px-4 py-2 text-black dark:bg-gray-700 dark:text-white"
                         >
                             {t('cancel')}
                         </button>
                         <button
                             onClick={handleSubmit}
                             disabled={loading || !content.trim()}
-                            className="px-4 py-2 bg-theme text-white rounded-lg disabled:opacity-50"
+                            className="rounded-full bg-theme px-4 py-2 text-white disabled:opacity-50"
                         >
                             {loading ? t('saving') : editingMoment ? t('update.title') : t('publish.title')}
                         </button>
                     </div>
                 </div>
-            </Modal>
+            </ModalSurface>
             
             <AlertUI />
             <ConfirmUI />

@@ -20,7 +20,7 @@ export function AdjacentSection({id, setError}: { id: string, setError: (error: 
             });
     }, [id, setError]);
     return (
-        <div className="rounded-2xl bg-w m-2 grid grid-cols-1 sm:grid-cols-2">
+        <div className="m-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <AdjacentCard data={adjacentFeeds?.previousFeed} type="previous"/>
             <AdjacentCard data={adjacentFeeds?.nextFeed} type="next"/>
         </div>
@@ -29,28 +29,28 @@ export function AdjacentSection({id, setError}: { id: string, setError: (error: 
 
 export function AdjacentCard({data, type}: { data: AdjacentFeed | null | undefined, type: "previous" | "next" }) {
     const direction = type === "previous" ? "text-start" : "text-end"
-    const radius = type === "previous" ? "rounded-t-2xl sm:rounded-none sm:rounded-l-2xl" : "rounded-b-2xl sm:rounded-none sm:rounded-r-2xl"
     const {t} = useTranslation()
+    const label = type === "previous" ? t("previous") : t("next")
     if (!data) {
-        return (<div className="w-full p-6 duration-300">
-            <p className={`t-secondary w-full ${direction}`}>
-                {type === "previous" ? "Previous" : "Next"}
+        return (<div className="w-full rounded-[24px] border border-black/10 bg-w p-6 dark:border-white/10">
+            <p className={`w-full text-[11px] font-semibold uppercase tracking-[0.24em] t-secondary ${direction}`}>
+                {label}
             </p>
-            <h1 className={`text-xl text-gray-700 dark:text-white text-pretty truncate ${direction}`}>
+            <h1 className={`mt-3 text-xl font-semibold text-gray-700 dark:text-white text-pretty truncate ${direction}`}>
                 {t('no_more')}
             </h1>
         </div>);
     }
     return (
         <Link href={`/feed/${data.id}`} target="_blank"
-              className={`w-full p-6 duration-300 bg-button ${radius}`}>
-            <p className={`t-secondary w-full ${direction}`}>
-                {type === "previous" ? "Previous" : "Next"}
+              className="w-full rounded-[24px] border border-black/10 bg-w p-6 transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_48px_-40px_rgba(15,23,42,0.35)] dark:border-white/10">
+            <p className={`w-full text-[11px] font-semibold uppercase tracking-[0.24em] t-secondary ${direction}`}>
+                {label}
             </p>
-            <h1 className={`text-xl font-bold text-gray-700 dark:text-white text-pretty truncate ${direction}`}>
+            <h1 className={`mt-3 text-xl font-semibold text-gray-700 dark:text-white text-pretty truncate ${direction}`}>
                 {data.title}
             </h1>
-            <p className={`space-x-2 ${direction}`}>
+            <p className={`mt-3 space-x-2 ${direction}`}>
                 <span className="text-gray-400 text-sm" title={new Date(data.createdAt).toLocaleString()}>
                     {data.createdAt === data.updatedAt ? timeago(data.createdAt) : t('feed_card.published$time', {time: timeago(data.createdAt)})}
                 </span>

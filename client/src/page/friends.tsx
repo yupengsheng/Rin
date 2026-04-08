@@ -2,11 +2,12 @@ import i18next from "i18next";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Helmet } from 'react-helmet';
 import { useTranslation } from "react-i18next";
-import Modal from 'react-modal';
-import { FlatActionButton, FlatPanel, SearchableSelect } from "@rin/ui";
+import { SearchableSelect } from "@rin/ui";
+import { Button } from "../components/button";
 import { ShowAlertType, useAlert, useConfirm } from "../components/dialog";
 import { Input } from "../components/input";
 import { Waiting } from "../components/loading";
+import { EmptyState, ModalSurface, PageIntro, PageShell, SurfaceCard } from "../components/public-ui";
 import { client } from "../app/runtime";
 import { ClientConfigContext } from "../state/config";
 import { ProfileContext } from "../state/profile";
@@ -63,6 +64,12 @@ export function FriendsPage() {
     const [status, setStatus] = useState<'idle' | 'loading'>('loading')
     const ref = useRef(false)
     const { showAlert, AlertUI } = useAlert()
+    const totalFriends =
+        friendsAvailable.length +
+        friendsUnavailable.length +
+        waitList.length +
+        refusedList.length +
+        (apply ? 1 : 0)
     useEffect(() => {
         if (ref.current) return
         client.friend.list().then(({ data }) => {
@@ -94,53 +101,74 @@ export function FriendsPage() {
             <meta property="og:url" content={document.URL} />
         </Helmet>
         <Waiting for={friendsAvailable.length !== 0 || friendsUnavailable.length !== 0 || status === "idle"}>
-            <main className="w-full flex flex-col justify-center items-center mb-8 t-primary ani-show">
-                <FriendList title={t('friends.title')} show={friendsAvailable.length > 0} friends={friendsAvailable} />
-                <FriendList title={t('friends.left')} show={friendsUnavailable.length > 0} friends={friendsUnavailable} />
-                <FriendList title={t('friends.review.waiting')} show={waitList.length > 0} friends={waitList} />
-                <FriendList title={t('friends.review.rejected')} show={refusedList.length > 0} friends={refusedList} />
-                <FriendList title={t('friends.my_apply')} show={profile?.permission !== true && apply !== undefined} friends={apply ? [apply] : []} />
-                {profile && (profile.permission || config.get("friend_apply_enable")) &&
-                    <div className="wauto t-primary flex text-start text-2xl font-bold mt-8">
-                        <FlatPanel className="md:basis-1/2 p-6">
-                            <p>
-                                {profile.permission ? t('friends.create') : t('friends.apply')}
-                            </p>
-                            <div className="text-sm mt-4 text-neutral-500 font-normal">
-                                <Input value={name} setValue={setName} placeholder={t('sitename')} variant="flat" />
-                                <Input value={desc} setValue={setDesc} placeholder={t('description')} variant="flat" className="mt-2" />
-                                <Input value={avatar} setValue={setAvatar} placeholder={t('avatar.url')} variant="flat" className="mt-2" />
-                                <Input value={url} setValue={setUrl} placeholder={t('url')} variant="flat" className="my-2" />
-                                <div className='flex flex-row justify-center'>
-                                    <button onClick={publishButton} className='basis-1/2 rounded-full bg-theme py-4 text-white'>{t('create.title')}</button>
+            <PageShell className="ani-show">
+                <div className="mx-auto w-full max-w-5xl space-y-6 t-primary">
+                    <PageIntro
+                        eyebrow={t('friends.title')}
+                        title={t('friends.title')}
+                        description={t('article.total$count', { count: totalFriends })}
+                    />
+
+                    <FriendList title={t('friends.title')} friends={friendsAvailable} />
+                    <FriendList title={t('friends.left')} friends={friendsUnavailable} />
+                    <FriendList title={t('friends.review.waiting')} friends={waitList} />
+                    <FriendList title={t('friends.review.rejected')} friends={refusedList} />
+                    {profile?.permission !== true && apply !== undefined ? <FriendList title={t('friends.my_apply')} friends={apply ? [apply] : []} /> : null}
+
+                    {totalFriends === 0 ? (
+                        <EmptyState
+                            title={t("friends.empty_title")}
+                            description={t("friends.empty_description")}
+                        />
+                    ) : null}
+
+                    {profile && (profile.permission || config.get("friend_apply_enable")) &&
+                        <SurfaceCard className="p-6 sm:p-8">
+                            <div className="max-w-2xl space-y-5">
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-theme/75">
+                                        {profile.permission ? t('friends.create') : t('friends.apply')}
+                                    </p>
+                                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] t-primary">
+                                        {profile.permission ? t('friends.create') : t('friends.apply')}
+                                    </h2>
+                                </div>
+                                <div className="grid gap-3">
+                                    <Input value={name} setValue={setName} placeholder={t('sitename')} variant="flat" className="rounded-2xl py-3" />
+                                    <Input value={desc} setValue={setDesc} placeholder={t('description')} variant="flat" className="rounded-2xl py-3" />
+                                    <Input value={avatar} setValue={setAvatar} placeholder={t('avatar.url')} variant="flat" className="rounded-2xl py-3" />
+                                    <Input value={url} setValue={setUrl} placeholder={t('url')} variant="flat" className="rounded-2xl py-3" />
+                                </div>
+                                <div className='flex justify-end'>
+                                    <Button onClick={publishButton} title={t('create.title')} />
                                 </div>
                             </div>
-                        </FlatPanel>
-                    </div>
-                }
-            </main>
+                        </SurfaceCard>
+                    }
+                </div>
+            </PageShell>
         </Waiting>
         <AlertUI />
     </>)
 }
 
-function FriendList({ title, show, friends }: { title: string, show: boolean, friends: FriendItem[] }) {
-    return (<>
-        {
-            show && <>
-                <div className="wauto text-start py-4">
-                    <p className="text-sm mt-4 text-neutral-500 font-normal">
-                        {title}
-                    </p>
-                </div>
-                <div className="wauto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {friends.map((friend) => (
-                        <Friend key={friend.id} friend={friend} />
-                    ))}
-                </div>
-            </>
-        }
-    </>)
+function FriendList({ title, friends }: { title: string, friends: FriendItem[] }) {
+    if (!friends.length) return null;
+    return (
+        <SurfaceCard className="p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold tracking-[-0.02em] t-primary">{title}</h2>
+                <span className="rounded-full bg-black/[0.04] px-3 py-1 text-xs font-semibold t-secondary dark:bg-white/[0.06]">
+                    {friends.length}
+                </span>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {friends.map((friend) => (
+                    <Friend key={friend.id} friend={friend} />
+                ))}
+            </div>
+        </SurfaceCard>
+    )
 }
 
 function Friend({ friend }: { friend: FriendItem }) {
@@ -199,55 +227,51 @@ function Friend({ friend }: { friend: FriendItem }) {
     ]
     return (
         <>
-            <a title={friend.name} href={friend.url} target="_blank" className="bg-button w-full bg-w rounded-xl p-4 flex flex-col justify-center items-center relative">
-                <div className="w-16 h-16">
-                    <img className={"rounded-full " + (friend.health.length > 0 ? "grayscale" : "")} src={friend.avatar} alt={friend.name} />
+            <a
+                title={friend.name}
+                href={friend.url}
+                target="_blank"
+                className="group relative flex w-full flex-col gap-4 rounded-[24px] border border-black/10 bg-w p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)] dark:border-white/10"
+            >
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="h-14 w-14 overflow-hidden rounded-2xl border border-black/10 bg-black/[0.03] dark:border-white/10 dark:bg-white/[0.04]">
+                            <img className={`h-full w-full object-cover ${friend.health.length > 0 ? "grayscale" : ""}`} src={friend.avatar} alt={friend.name} />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="truncate text-base font-semibold t-primary group-hover:text-theme">{friend.name}</p>
+                            {friend.accepted !== 1 ? (
+                                <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.18em] ${friend.accepted === 0 ? "t-secondary" : "text-theme"}`}>
+                                    {statusOption[friend.accepted + 1].label}
+                                </p>
+                            ) : null}
+                        </div>
+                    </div>
+                    {(profile?.permission || profile?.id === friend.uid) ? (
+                        <button
+                            onClick={(e) => { e.preventDefault(); setIsOpen(true) }}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] t-secondary transition-colors hover:bg-black/[0.08] hover:text-neutral-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:hover:text-white"
+                            type="button"
+                        >
+                            <i className="ri-settings-line"></i>
+                        </button>
+                    ) : null}
                 </div>
-                <p className="text-base text-center">{friend.name}</p>
-                {friend.health.length == 0 && <p className="text-sm text-neutral-500 text-center">{friend.desc}</p>}
-                {friend.accepted !== 1 && <p className={`${friend.accepted === 0 ? "t-primary" : "text-theme"}`}>{statusOption[friend.accepted + 1].label}</p>}
-                {friend.health.length > 0 && <p className="text-sm text-gray-500 text-center">{errorHumanize(friend.health)}</p>}
-                {(profile?.permission || profile?.id === friend.uid) && <>
-                    <button onClick={(e) => { e.preventDefault(); setIsOpen(true) }} className="absolute top-0 right-0 m-2 px-2 py-1 bg-secondary t-primary rounded-full bg-button">
-                        <i className="ri-settings-line"></i>
-                    </button></>}
+                {friend.health.length == 0 ? (
+                    <p className="line-clamp-3 text-sm leading-6 t-secondary">{friend.desc}</p>
+                ) : (
+                    <p className="text-sm leading-6 text-gray-500">{errorHumanize(friend.health)}</p>
+                )}
             </a>
 
-            <Modal
-                isOpen={modalIsOpen}
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        padding: '0',
-                        border: 'none',
-                        borderRadius: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: 'white',
-                    },
-                    overlay: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        zIndex: 1000
-                    }
-                }
-                }
-                onRequestClose={() => setIsOpen(false)}
-                contentLabel={t('update$sth', { sth: friend.name })}
-            >
-                <FlatPanel className="relative flex w-[80vw] flex-col items-center justify-start p-6 sm:w-[60vw] md:w-[50vw] lg:w-[40vw] xl:w-[30vw]">
-                    <div className="w-16 h-16">
-                        <img className={"rounded-xl " + (friend.health.length > 0 ? "grayscale" : "")} src={friend.avatar} alt={friend.name} />
+            <ModalSurface isOpen={modalIsOpen} onRequestClose={() => setIsOpen(false)} className="max-w-[min(92vw,34rem)]">
+                <div className="relative flex w-full flex-col items-center justify-start">
+                    <div className="h-16 w-16 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
+                        <img className={"h-full w-full object-cover rounded-xl " + (friend.health.length > 0 ? "grayscale" : "")} src={friend.avatar} alt={friend.name} />
                     </div>
                     {profile?.permission &&
-                        <div className="flex flex-col w-full items-start mt-4 px-4">
-                            <div className="flex flex-row justify-between w-full items-center">
+                        <div className="mt-5 flex w-full flex-col items-start">
+                            <div className="flex w-full flex-row items-center justify-between">
                                 <div className="flex flex-col">
                                     <p className="text-lg dark:text-white">
                                         {t('status')}
@@ -271,33 +295,30 @@ function Friend({ friend }: { friend: FriendItem }) {
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-row justify-between w-full items-center mt-2">
+                            <div className="mt-3 flex w-full flex-row items-center justify-between gap-4">
                                 <div className="flex flex-col">
                                     <p className="text-lg dark:text-white">
                                         {t('sort_order')}
                                     </p>
                                 </div>
                                 <div className="flex flex-row items-center justify-center space-x-4">
-                                    <Input
-                                        value={sortOrder.toString()} 
-                                        setValue={(val) => setSortOrder(parseInt(val) || 0)} 
-                                        placeholder={t('sort_order')}
-                                        variant="flat"
-                                    />
+                                    <Input value={sortOrder.toString()} setValue={(val) => setSortOrder(parseInt(val) || 0)} placeholder={t('sort_order')} variant="flat" className="rounded-2xl" />
                                 </div>
                             </div>
                         </div>
                     }
-                    <Input value={name} setValue={setName} placeholder={t('sitename')} variant="flat" className="mt-4" />
-                    <Input value={desc} setValue={setDesc} placeholder={t('description')} variant="flat" className="mt-2" />
-                    <Input value={avatar} setValue={setAvatar} placeholder={t('avatar.url')} variant="flat" className="mt-2" />
-                    <Input value={url} setValue={setUrl} placeholder={t('url')} variant="flat" className="my-2" />
-                    <div className='flex flex-row justify-center space-x-2'>
-                        <FlatActionButton onClick={deleteFriend} className="mt-2 text-theme">{t('delete.title')}</FlatActionButton>
-                        <FlatActionButton onClick={updateFriend} className="mt-2 t-primary">{t('save')}</FlatActionButton>
+                    <div className="mt-5 grid w-full gap-3">
+                        <Input value={name} setValue={setName} placeholder={t('sitename')} variant="flat" className="rounded-2xl py-3" />
+                        <Input value={desc} setValue={setDesc} placeholder={t('description')} variant="flat" className="rounded-2xl py-3" />
+                        <Input value={avatar} setValue={setAvatar} placeholder={t('avatar.url')} variant="flat" className="rounded-2xl py-3" />
+                        <Input value={url} setValue={setUrl} placeholder={t('url')} variant="flat" className="rounded-2xl py-3" />
                     </div>
-                </FlatPanel>
-            </Modal>
+                    <div className='mt-5 flex w-full justify-end space-x-2'>
+                        <Button secondary onClick={deleteFriend} title={t('delete.title')} />
+                        <Button onClick={updateFriend} title={t('save')} />
+                    </div>
+                </div>
+            </ModalSurface>
             <ConfirmUI />
             <AlertUI />
         </>

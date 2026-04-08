@@ -233,21 +233,27 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                         <button
                           aria-label={top > 0 ? t("untop.title") : t("top.title")}
                           onClick={topFeed}
-                          className={`flex-1 flex flex-col items-end justify-center px-2 py rounded-full transition ${top > 0 ? "bg-theme text-white hover:bg-theme-hover active:bg-theme-active" : "bg-secondary bg-button dark:text-neutral-400"}`}
+                          className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition ${
+                            top > 0
+                              ? "bg-theme text-white shadow-lg shadow-theme/20 hover:bg-theme-hover active:bg-theme-active"
+                              : "bg-black/[0.04] t-secondary hover:bg-black/[0.08] hover:text-neutral-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:hover:text-white"
+                          }`}
+                          type="button"
                         >
                           <i className="ri-skip-up-line" />
                         </button>
                         <Link
                           aria-label={t("edit")}
                           href={`/admin/writing/${feed.id}`}
-                          className="flex-1 flex flex-col items-end justify-center px-2 py bg-secondary bg-button rounded-full transition"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/[0.04] t-secondary transition-colors hover:bg-black/[0.08] hover:text-neutral-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:hover:text-white"
                         >
-                          <i className="ri-edit-2-line dark:text-neutral-400" />
+                          <i className="ri-edit-2-line" />
                         </Link>
                         <button
                           aria-label={t("delete.title")}
                           onClick={deleteFeed}
-                          className="flex-1 flex flex-col items-end justify-center px-2 py bg-secondary bg-button rounded-full transition"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/[0.04] transition-colors hover:bg-rose-500/10 dark:bg-white/[0.05] dark:hover:bg-rose-500/10"
+                          type="button"
                         >
                           <i className="ri-delete-bin-7-line text-red-500" />
                         </button>
@@ -498,19 +504,13 @@ function CommentInput({
       ref={containerRef}
       className="w-full rounded-[28px] border border-black/10 bg-w p-6 t-primary shadow-[0_24px_70px_-48px_rgba(15,23,42,0.45)] dark:border-white/10"
     >
-      <div className="mb-5 flex w-full flex-col gap-3 border-b border-black/5 pb-5 dark:border-white/10">
-        <div className="flex items-center gap-3">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-theme/10 text-theme">
-            <i className="ri-chat-3-line text-lg" />
-          </span>
-          <div className="min-w-0">
-            <label htmlFor="comment" className="text-3xl font-bold tracking-[-0.03em]">{t("comment.form.title")}</label>
-            <p className="text-sm text-neutral-500">{t("comment.form.desc")}</p>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-black/5 bg-black/[0.02] px-4 py-3 text-sm dark:border-white/10 dark:bg-white/[0.03]">
-          <p className="font-medium t-primary">{t("comment.form.required_tip")}</p>
-          <p className="mt-1 t-secondary">{t("comment.form.optional_tip")}</p>
+      <div className="mb-6 flex items-center gap-3">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-theme/20 bg-theme/10 text-theme">
+          <i className="ri-chat-3-line text-base" />
+        </span>
+        <div className="min-w-0">
+          <label htmlFor="comment" className="text-2xl font-semibold tracking-[-0.025em]">{t("comment.form.title")}</label>
+          <p className="mt-0.5 text-[13px] leading-5 t-secondary">{t("comment.form.desc")}</p>
         </div>
       </div>
       {successMessage ? (
@@ -544,9 +544,9 @@ function CommentInput({
         </div>
       ) : null}
       <div className="flex flex-col gap-2">
-        <label htmlFor="comment" className="flex items-center gap-2 text-sm font-medium t-primary">
+        <label htmlFor="comment" className="flex items-center gap-2 text-[13px] font-semibold t-primary">
           <span>{t("comment.form.content")}</span>
-          <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[11px] font-semibold text-theme">{t("comment.form.required_label")}</span>
+          <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[10px] font-semibold text-theme">{t("comment.form.required_label")}</span>
         </label>
         <textarea
           ref={textareaRef}
@@ -564,9 +564,9 @@ function CommentInput({
       </div>
       <div className="mt-4 grid w-full gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-medium t-primary">
+          <label className="flex items-center gap-2 text-[13px] font-semibold t-primary">
             <span>{t("comment.form.author_name")}</span>
-            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[11px] font-semibold text-theme">{t("comment.form.required_label")}</span>
+            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[10px] font-semibold text-theme">{t("comment.form.required_label")}</span>
           </label>
           <input
             className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
@@ -581,9 +581,9 @@ function CommentInput({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-medium t-primary">
+          <label className="flex items-center gap-2 text-[13px] font-semibold t-primary">
             <span>{t("comment.form.author_email")}</span>
-            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[11px] font-semibold text-theme">{t("comment.form.required_label")}</span>
+            <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[10px] font-semibold text-theme">{t("comment.form.required_label")}</span>
           </label>
           <input
             className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
@@ -597,11 +597,12 @@ function CommentInput({
               setAuthorEmail(e.target.value);
             }}
           />
+          <p className="px-1 text-xs t-secondary">{t("comment.form.email_private")}</p>
         </div>
         <div className="flex flex-col gap-2 md:col-span-2">
-          <label className="flex items-center gap-2 text-sm font-medium t-primary">
+          <label className="flex items-center gap-2 text-[13px] font-semibold t-primary">
             <span>{t("comment.form.author_url")}</span>
-            <span className="rounded-full bg-black/5 px-2 py-0.5 text-[11px] font-semibold t-secondary dark:bg-white/10">{t("comment.form.optional_label")}</span>
+            <span className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-semibold t-secondary dark:bg-white/10">{t("comment.form.optional_label")}</span>
           </label>
           <input
             className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
@@ -628,9 +629,6 @@ function CommentInput({
               />
               {t("comment.form.remember_me")}
             </label>
-            <p className="text-xs t-secondary">
-              {isFormComplete ? t("comment.form.ready_hint") : t("comment.form.complete_required")}
-            </p>
           </div>
           <div className="flex items-center justify-end gap-3">
             {replyTarget ? (
@@ -694,7 +692,16 @@ function Comments({ id }: { id: string }) {
   return (
     <>
       {config.getBoolean('comment.enabled') &&
-        <div className="m-2 mt-8 flex flex-col items-center justify-center">
+        <section className="m-2 mt-8 w-full rounded-[32px] border border-black/10 bg-gradient-to-b from-white via-white to-black/[0.02] p-3 shadow-[0_30px_90px_-65px_rgba(15,23,42,0.45)] dark:border-white/10 dark:from-dark dark:via-dark dark:to-white/[0.02] sm:p-4">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-[26px] border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-theme/75">{t("comment.title")}</p>
+              <p className="mt-1 text-sm t-secondary">{t("comment.list.count$count", { count: totalComments })}</p>
+            </div>
+            <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-theme/20 bg-theme/10 px-3 text-sm font-semibold text-theme">
+              {totalComments}
+            </span>
+          </div>
           <CommentInput id={id} onRefresh={loadComments} replyTarget={replyTarget} onCancelReply={() => setReplyTarget(null)} />
           {error && (
             <div className="mt-4 flex w-full flex-col items-start justify-center rounded-2xl border border-red-200/70 bg-red-50/80 p-6 text-red-700 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-200">
@@ -705,13 +712,7 @@ function Comments({ id }: { id: string }) {
             </div>
           )}
           {!error && (
-            <div className="mt-6 w-full">
-              <div className="mb-4 flex items-end justify-between gap-3 px-1">
-                <div>
-                  <h2 className="text-2xl font-semibold tracking-[-0.02em] t-primary">{t("comment.title")}</h2>
-                  <p className="mt-1 text-sm t-secondary">{t("comment.list.count$count", { count: totalComments })}</p>
-                </div>
-              </div>
+            <div className="mt-5 w-full rounded-[28px] border border-black/5 bg-white/75 p-4 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.03] sm:p-5">
               {rootComments.length > 0 ? (
                 <div className="space-y-4">
                   {rootComments.map((comment) => (
@@ -725,13 +726,16 @@ function Comments({ id }: { id: string }) {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-black/10 bg-black/[0.02] px-6 py-10 text-center dark:border-white/10 dark:bg-white/[0.03]">
-                  <p className="text-base font-medium t-primary">{t("comment.list.empty")}</p>
+                <div className="rounded-[24px] border border-dashed border-black/10 bg-gradient-to-b from-black/[0.015] to-transparent px-6 py-12 text-center dark:border-white/10 dark:from-white/[0.03] dark:to-transparent">
+                  <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-theme/10 text-theme">
+                    <i className="ri-chat-smile-3-line text-lg" />
+                  </span>
+                  <p className="mt-4 text-base font-medium t-primary">{t("comment.list.empty")}</p>
                 </div>
               )}
             </div>
           )}
-        </div>
+        </section>
       }
     </>
   );
@@ -749,10 +753,11 @@ function CommentThread({
   onReply: (comment: ApiComment) => void;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="relative space-y-3 pl-4 before:absolute before:bottom-2 before:left-[6px] before:top-6 before:w-px before:bg-black/[0.08] dark:before:bg-white/10">
+      <span className="absolute left-0 top-5 h-3 w-3 rounded-full border-2 border-white bg-theme shadow-[0_0_0_4px_rgba(252,70,107,0.12)] dark:border-dark" />
       <CommentItem comment={comment} onRefresh={onRefresh} onReply={onReply} />
       {replies.length > 0 ? (
-        <div className="ml-4 space-y-3 border-l border-black/10 pl-4 dark:border-white/10">
+        <div className="ml-2 space-y-3 border-l border-black/[0.08] pl-5 dark:border-white/10">
           {replies.map((reply) => (
             <CommentItem key={reply.id} comment={reply} onRefresh={onRefresh} onReply={onReply} compact />
           ))}
@@ -799,7 +804,7 @@ function CommentItem({
     <div
       className={`rounded-2xl border p-4 ${
         compact
-          ? "border-black/5 bg-black/[0.02] dark:border-white/10 dark:bg-white/[0.03]"
+          ? "border-black/5 bg-black/[0.015] dark:border-white/10 dark:bg-white/[0.03]"
           : "border-black/10 bg-w shadow-[0_22px_50px_-42px_rgba(15,23,42,0.55)] dark:border-white/10"
       }`}
     >
@@ -821,7 +826,7 @@ function CommentItem({
           </span>
         </div>
         {comment.replyTo ? (
-          <blockquote className="rounded-2xl border border-theme/15 bg-theme/5 px-4 py-3 text-sm text-neutral-600 dark:border-theme/20 dark:bg-theme/10 dark:text-neutral-300">
+          <blockquote className="rounded-2xl border border-theme/20 bg-gradient-to-r from-theme/10 to-theme/5 px-4 py-3 text-sm text-neutral-600 dark:border-theme/20 dark:from-theme/10 dark:to-theme/5 dark:text-neutral-300">
             <p className="font-medium t-primary">{t("comment.reply.quote$name", { name: comment.replyTo.authorName })}</p>
             <p className="truncate">{comment.replyTo.contentPreview}</p>
           </blockquote>

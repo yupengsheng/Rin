@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { ButtonWithLoading } from "../components/button";
 import { Icon } from "../components/icon";
 import { Input } from "../components/input";
+import { CenteredShell, FeedbackBanner, SurfaceCard } from "../components/public-ui";
 import { client, oauth_url } from "../app/runtime";
 import { setAuthToken } from "../utils/auth";
 import { getLoginRedirectPath } from "../utils/auth-redirect";
@@ -61,61 +62,63 @@ export function LoginPage() {
     };
 
     return (
-        <div className="flex items-center justify-center my-8">
-            <div className="bg-w w-full max-w-md flex flex-col items-center justify-between p-8 space-y-4 t-primary rounded-2xl shadow-lg">
-                <p className="text-2xl font-bold">{t('login.title')}</p>
-
-                {/* Error message */}
-                {error && (
-                    <p className="text-sm text-red-500">{error}</p>
-                )}
-
-                {/* Password login form */}
-                {authStatus.password && (
-                    <>
-                        <Input
-                            value={username}
-                            setValue={setUsername}
-                            placeholder={t('login.username.placeholder')}
-                            disabled={isLoading}
-                            autofocus
-                        />
-                        <Input
-                            value={password}
-                            setValue={setPassword}
-                            placeholder={t('login.password.placeholder')}
-                            type="password"
-                            onSubmit={handleLogin}
-                            disabled={isLoading}
-                        />
-                        <div className="flex flex-row items-center space-x-4 pt-2">
-                            <ButtonWithLoading
-                                title={isLoading ? t("login.loading") : t("login.title")}
-                                onClick={handleLogin}
-                                loading={isLoading}
-                            />
-                        </div>
-                    </>
-                )}
-
-                {/* OAuth options */}
-                {authStatus.github && (
-                    <div className="flex flex-col justify-center items-center space-y-2 pt-2">
-                        {authStatus.password && <p className="text-xs t-secondary">{t('login.or')}</p>}
-                        {!authStatus.password && <p className="text-xs t-secondary">{t('login.oauth_only')}</p>}
-                        <div className="flex flex-row items-center space-x-4">
-                            <Icon label={t('github_login')} name="ri-github-line" onClick={() => {
-                                window.location.href = `${oauth_url}`
-                            }} hover={true} />
-                        </div>
+        <CenteredShell className="my-6">
+            <SurfaceCard className="w-full max-w-xl p-8 sm:p-10">
+                <div className="flex flex-col gap-6">
+                    <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-theme/75">{t('login.title')}</p>
+                        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] t-primary">{t('login.title')}</h1>
+                        <p className="mt-2 text-sm leading-6 t-secondary">{t('login.required')}</p>
                     </div>
-                )}
 
-                {/* No auth methods available */}
-                {!authStatus.github && !authStatus.password && (
-                    <p className="text-sm text-red-500">{t('login.no_methods')}</p>
-                )}
-            </div>
-        </div>
+                    {error ? <FeedbackBanner tone="danger">{error}</FeedbackBanner> : null}
+
+                    {authStatus.password && (
+                        <div className="space-y-4">
+                            <Input
+                                value={username}
+                                setValue={setUsername}
+                                placeholder={t('login.username.placeholder')}
+                                disabled={isLoading}
+                                autofocus
+                                className="rounded-2xl py-3"
+                            />
+                            <Input
+                                value={password}
+                                setValue={setPassword}
+                                placeholder={t('login.password.placeholder')}
+                                type="password"
+                                onSubmit={handleLogin}
+                                disabled={isLoading}
+                                className="rounded-2xl py-3"
+                            />
+                            <div className="pt-2">
+                                <ButtonWithLoading
+                                    title={isLoading ? t("login.loading") : t("login.title")}
+                                    onClick={handleLogin}
+                                    loading={isLoading}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {authStatus.github && (
+                        <div className="rounded-2xl border border-black/5 bg-black/[0.02] px-5 py-4 text-center dark:border-white/10 dark:bg-white/[0.03]">
+                            {authStatus.password ? <p className="text-xs font-semibold uppercase tracking-[0.24em] t-secondary">{t('login.or')}</p> : null}
+                            {!authStatus.password ? <p className="text-sm t-secondary">{t('login.oauth_only')}</p> : null}
+                            <div className="mt-3 flex justify-center">
+                                <Icon label={t('github_login')} name="ri-github-line" onClick={() => {
+                                    window.location.href = `${oauth_url}`
+                                }} hover={true} />
+                            </div>
+                        </div>
+                    )}
+
+                    {!authStatus.github && !authStatus.password ? (
+                        <FeedbackBanner tone="danger">{t('login.no_methods')}</FeedbackBanner>
+                    ) : null}
+                </div>
+            </SurfaceCard>
+        </CenteredShell>
     );
 }

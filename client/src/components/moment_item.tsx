@@ -29,16 +29,16 @@ export function MomentItem({
     const { createdAt, updatedAt } = moment;
     
     return (
-        <div className="bg-w p-4 rounded-lg">
-            <div className="flex justify-between">
+        <div className="rounded-[24px] border border-black/10 bg-w p-5 shadow-[0_20px_45px_-40px_rgba(15,23,42,0.5)] dark:border-white/10">
+            <div className="flex justify-between gap-4">
                 <div className="flex items-center space-x-3">
                     <img 
                         src={moment.user.avatar} 
                         alt={moment.user.username} 
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="h-10 w-10 rounded-2xl object-cover"
                     />
                     <div>
-                        <p className="t-primary">
+                        <p className="font-semibold t-primary">
                             {moment.user.username}
                         </p>
                         <p className="space-x-2 t-secondary text-sm"> 
@@ -59,14 +59,14 @@ export function MomentItem({
                             <button
                                 aria-label={t("edit")}
                                 onClick={() => onEdit(moment)}
-                                className="flex-1 flex flex-col items-end justify-center px-2 py bg-secondary bg-button rounded-full transition"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] t-secondary transition-colors hover:bg-black/[0.08] hover:text-neutral-900 dark:bg-white/[0.05] dark:hover:bg-white/10 dark:hover:text-white"
                             >
-                                <i className="ri-edit-2-line dark:text-neutral-400" />
+                                <i className="ri-edit-2-line" />
                             </button>
                             <button
                                 aria-label={t("delete.title")}
                                 onClick={() => onDelete(moment.id)}
-                                className="flex-1 flex flex-col items-end justify-center px-2 py bg-secondary bg-button rounded-full transition"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] transition-colors hover:bg-rose-500/10 dark:bg-white/[0.05] dark:hover:bg-rose-500/10"
                             >
                                 <i className="ri-delete-bin-7-line text-red-500" />
                             </button>
@@ -74,7 +74,7 @@ export function MomentItem({
                     </div>
                 )}
             </div>
-            <div className="text-black dark:text-white mt-2">
+            <div className="mt-4 border-t border-black/5 pt-4 text-black dark:border-white/10 dark:text-white">
                 <Markdown content={moment.content} />
             </div>
         </div>

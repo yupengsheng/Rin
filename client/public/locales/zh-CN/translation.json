@@ -66,10 +66,14 @@
       "title": "删除文章"
     },
     "search": {
+      "empty_description$keyword": "没有找到与“{{keyword}}”相关的内容，试试换个关键词。",
+      "empty_title": "没有匹配的文章",
       "placeholder": "请输入关键字",
       "title": "搜索",
       "title$keyword": "搜索：{{keyword}}"
     },
+    "empty_description": "这里暂时还没有内容，发布文章后会出现在这里。",
+    "empty_title": "还没有文章",
     "title": "文章",
     "top": {
       "confirm": "确定置顶这篇文章吗？",
@@ -103,6 +107,7 @@
       "complete_required": "填写完必填字段后即可发布评论",
       "content": "留言内容",
       "desc": "您的留言（支持引用与回复）",
+      "email_private": "不会对外展示",
       "optional_label": "可选",
       "optional_tip": "个人网址为可选项，仅用于展示您的主页链接",
       "ready_hint": "信息已就绪，可以发布评论",
@@ -175,6 +180,8 @@
   "friends": {
     "apply": "申请友链",
     "create": "创建友链",
+    "empty_description": "这里还没有展示中的友链，添加后就会逐渐热闹起来。",
+    "empty_title": "还没有友链",
     "left": "暂时离开",
     "my_apply": "我的申请",
     "review": {
@@ -219,6 +226,8 @@
   "logout": "退出登录",
   "main_content": "正文",
   "moments": {
+    "empty_description": "发布短动态后，会在这里按时间流展示出来。",
+    "empty_title": "还没有动态",
     "edit": "编辑动态",
     "publish": "发布动态",
     "title": "动态",

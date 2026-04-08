@@ -6,6 +6,7 @@ import { client } from "../app/runtime"
 import {useSiteConfig} from "../hooks/useSiteConfig";
 import {siteName} from "../utils/constants"
 import {useTranslation} from "react-i18next";
+import { EmptyState, PageIntro, PageShell, SurfaceCard } from "../components/public-ui";
 
 interface FeedItem {
     id: number;
@@ -59,36 +60,42 @@ export function TimelinePage() {
                 <meta property="og:url" content={document.URL} />
             </Helmet>
             <Waiting for={feeds}>
-                <main className="w-full flex flex-col justify-center items-center mb-8 ani-show">
-                    <div className="wauto text-start text-black dark:text-white py-4 text-4xl font-bold">
-                        <p>
-                            {t('timeline')}
-                        </p>
-                        <div className="flex flex-row justify-between">
-                            <p className="text-sm mt-4 text-neutral-500 font-normal">
-                                {t('article.total$count', { count: length })}
-                            </p>
-                        </div>
+                <PageShell className="ani-show">
+                    <div className="mx-auto w-full max-w-4xl space-y-6">
+                        <PageIntro
+                            eyebrow={t('timeline')}
+                            title={t('timeline')}
+                            description={t('article.total$count', { count: length })}
+                        />
+                        <SurfaceCard className="p-5 sm:p-6">
+                            {feeds && Object.keys(feeds).length > 0 ? (
+                                Object.keys(feeds).sort((a, b) => parseInt(b) - parseInt(a)).map(year => (
+                                    <div key={year} className="flex flex-col items-start py-3 first:pt-0 last:pb-0">
+                                        <h1 className="flex flex-row items-center space-x-2">
+                                            <span className="text-2xl font-bold t-primary ">
+                                                {t('year$year', { year: year })}
+                                            </span>
+                                            <span className="text-sm t-secondary">
+                                                {t('article.total_short$count', { count: feeds[+year]?.length })}
+                                            </span>
+                                        </h1>
+                                        <div className="my-4 w-full">
+                                            {feeds[+year]?.map(({ id, title, createdAt }) => (
+                                                <FeedItem key={id} id={id.toString()} title={title || t('unlisted')}
+                                                          createdAt={new Date(createdAt)}/>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <EmptyState
+                                    title={t("article.empty_title")}
+                                    description={t("article.empty_description")}
+                                />
+                            )}
+                        </SurfaceCard>
                     </div>
-                    {feeds && Object.keys(feeds).sort((a, b) => parseInt(b) - parseInt(a)).map(year => (
-                        <div key={year} className="wauto flex flex-col justify-center items-start">
-                            <h1 className="flex flex-row items-center space-x-2">
-                                <span className="text-2xl font-bold t-primary ">
-                                    {t('year$year', { year: year })}
-                                </span>
-                                <span className="text-sm t-secondary">
-                                    {t('article.total_short$count', { count: feeds[+year]?.length })}
-                                    </span>
-                            </h1>
-                            <div className="w-full flex flex-col justify-center items-start my-4">
-                                {feeds[+year]?.map(({ id, title, createdAt }) => (
-                                    <FeedItem key={id} id={id.toString()} title={title || t('unlisted')}
-                                              createdAt={new Date(createdAt)}/>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </main>
+                </PageShell>
             </Waiting>
         </>
     )
@@ -97,11 +104,11 @@ export function TimelinePage() {
 export function FeedItem({ id, title, createdAt }: { id: string, title: string, createdAt: Date }) {
     const formatter = new Intl.DateTimeFormat('en-US', { day: '2-digit', month: '2-digit' });
     return (
-        <div className="flex flex-row pl-8">
+        <div className="flex flex-row pl-6">
             <div className="flex flex-row items-center">
-                <div className="w-2 h-2 bg-theme rounded-full"></div>
+                <div className="h-2.5 w-2.5 rounded-full bg-theme shadow-[0_0_0_4px_rgba(252,70,107,0.12)]"></div>
             </div>
-            <div className="flex-1 rounded-2xl m-2 duration-300 flex flex-row items-center space-x-4   ">
+            <div className="m-2 flex flex-1 flex-row items-center space-x-4 rounded-2xl border border-black/5 bg-black/[0.015] px-4 py-3 duration-300 dark:border-white/10 dark:bg-white/[0.03]">
                 <span className="t-secondary text-sm" title={new Date(createdAt).toLocaleString()}>
                     {formatter.format(new Date(createdAt))}
                 </span>

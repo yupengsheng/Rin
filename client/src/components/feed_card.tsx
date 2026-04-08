@@ -68,11 +68,11 @@ const FEED_CARD_STYLES: Record<
     }
 > = {
     default: {
-        card: "my-2 inline-block w-full break-inside-avoid rounded-2xl bg-w p-6 duration-300 bg-button",
+        card: "my-2 inline-block w-full break-inside-avoid rounded-[26px] border border-black/10 bg-w p-5 shadow-[0_22px_48px_-42px_rgba(15,23,42,0.32)] transition-all hover:-translate-y-0.5 hover:shadow-[0_26px_58px_-40px_rgba(15,23,42,0.42)] dark:border-white/10",
         imageWrap: "",
-        meta: "text-gray-400 text-sm",
-        summary: "line-clamp-4 text-pretty overflow-hidden dark:text-neutral-500",
-        title: "text-xl font-bold text-gray-700 dark:text-white text-pretty overflow-hidden",
+        meta: "text-[12px] font-medium uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400",
+        summary: "line-clamp-4 text-pretty overflow-hidden text-[15px] leading-7 text-neutral-600 dark:text-neutral-300",
+        title: "text-2xl font-semibold tracking-[-0.02em] text-neutral-900 dark:text-white text-pretty overflow-hidden",
     },
     editorial: {
         card: "my-3 inline-block w-full break-inside-avoid overflow-hidden rounded-[28px] border border-black/10 bg-w p-3 shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_70px_rgba(15,23,42,0.12)] dark:border-white/10",
@@ -112,7 +112,7 @@ export function FeedCard({ id, title, avatar, draft, listed, top, summary, hasht
             ) : null}
             <div className={activeVariant === "editorial" ? "px-2 pb-2" : ""}>
                 <h1 className={styles.title}>{title}</h1>
-                <p className={`space-x-2 ${styles.meta}`}>
+                <p className={`mt-3 space-x-2 ${styles.meta}`}>
                     <span title={new Date(createdAt).toLocaleString()}>
                         {createdAt === updatedAt ? timeago(createdAt) : t('feed_card.published$time', { time: timeago(createdAt) })}
                     </span>
@@ -122,14 +122,14 @@ export function FeedCard({ id, title, avatar, draft, listed, top, summary, hasht
                         </span>
                     }
                 </p>
-                <p className={`space-x-2 ${styles.meta} ${activeVariant === "editorial" ? "mt-2" : ""}`}>
+                <p className={`space-x-2 ${styles.meta} mt-2`}>
                     {draft === 1 && <span>{t("draft")}</span>}
                     {listed === 0 && <span>{t("unlisted")}</span>}
                     {top === 1 && <span className="text-theme">{t('article.top.title')}</span>}
                 </p>
-                <p className={`${styles.summary} ${activeVariant === "editorial" ? "mt-4 max-w-3xl" : ""}`}>{summary}</p>
+                <p className={`${styles.summary} ${activeVariant === "editorial" ? "mt-4 max-w-3xl" : "mt-4"}`}>{summary}</p>
                 {hashtags.length > 0 &&
-                    <div className={`flex flex-row flex-wrap justify-start gap-2 ${activeVariant === "editorial" ? "mt-4" : "mt-2 gap-x-2"}`}>
+                    <div className={`flex flex-row flex-wrap justify-start gap-2 ${activeVariant === "editorial" ? "mt-4" : "mt-4"}`}>
                         {hashtags.map(({ name }, index) => (
                             <HashTag key={index} name={name} />
                         ))}
