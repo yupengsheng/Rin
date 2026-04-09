@@ -68,18 +68,18 @@ const FEED_CARD_STYLES: Record<
     }
 > = {
     default: {
-        card: "my-2 inline-block w-full break-inside-avoid rounded-[26px] border border-black/10 bg-w p-5 shadow-[0_22px_48px_-42px_rgba(15,23,42,0.32)] transition-all hover:-translate-y-0.5 hover:shadow-[0_26px_58px_-40px_rgba(15,23,42,0.42)] dark:border-white/10",
+        card: "my-3 inline-block w-full break-inside-avoid rounded-[30px] border border-black/8 bg-w p-5 shadow-[0_28px_78px_-58px_rgba(73,101,133,0.34)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_34px_88px_-58px_rgba(73,101,133,0.4)] dark:border-white/10 dark:shadow-[0_28px_78px_-54px_rgba(2,6,23,0.82)]",
         imageWrap: "",
-        meta: "text-[12px] font-medium uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400",
-        summary: "line-clamp-4 text-pretty overflow-hidden text-[15px] leading-7 text-neutral-600 dark:text-neutral-300",
-        title: "text-2xl font-semibold tracking-[-0.02em] text-neutral-900 dark:text-white text-pretty overflow-hidden",
+        meta: "text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500/90 dark:text-slate-300/80",
+        summary: "line-clamp-4 text-pretty overflow-hidden text-[15px] leading-7 text-slate-600 dark:text-slate-300",
+        title: "text-[1.9rem] font-semibold tracking-[-0.035em] text-slate-900 dark:text-white text-pretty overflow-hidden",
     },
     editorial: {
-        card: "my-3 inline-block w-full break-inside-avoid overflow-hidden rounded-[28px] border border-black/10 bg-w p-3 shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_70px_rgba(15,23,42,0.12)] dark:border-white/10",
-        imageWrap: "mb-3 overflow-hidden rounded-[22px] border border-black/5 dark:border-white/10",
-        meta: "text-[12px] font-medium uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400",
-        summary: "line-clamp-5 text-pretty text-[15px] leading-7 text-neutral-600 dark:text-neutral-300",
-        title: "text-2xl font-semibold tracking-[-0.02em] text-neutral-900 dark:text-white text-pretty overflow-hidden",
+        card: "my-3 inline-block w-full break-inside-avoid overflow-hidden rounded-[32px] border border-black/8 bg-w p-3 shadow-[0_30px_88px_-60px_rgba(73,101,133,0.34)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_36px_96px_-60px_rgba(73,101,133,0.4)] dark:border-white/10 dark:shadow-[0_30px_88px_-58px_rgba(2,6,23,0.84)]",
+        imageWrap: "mb-3 overflow-hidden rounded-[24px] border border-black/5 dark:border-white/10",
+        meta: "text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500/90 dark:text-slate-300/80",
+        summary: "line-clamp-5 text-pretty text-[15px] leading-7 text-slate-600 dark:text-slate-300",
+        title: "text-[1.9rem] font-semibold tracking-[-0.035em] text-slate-900 dark:text-white text-pretty overflow-hidden",
     },
 };
 

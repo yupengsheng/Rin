@@ -35,7 +35,7 @@ export function useAlert() {
     const AlertUI = () => (
         <ModalSurface isOpen={isOpen} onRequestClose={close} className="min-w-56 sm:min-w-96" maxWidth="36rem">
             <div className="flex flex-col items-start space-y-4">
-                <h1 className="text-2xl font-semibold tracking-[-0.03em] t-primary">
+                <h1 className="text-[2rem] font-semibold tracking-[-0.045em] t-primary">
                     {t("alert")}
                 </h1>
                 <p className="text-base leading-7 t-primary">
@@ -70,7 +70,7 @@ export function useConfirm() {
     const ConfirmUI = () => (
         <ModalSurface isOpen={isOpen} onRequestClose={close} className="min-w-56 sm:min-w-96" maxWidth="36rem">
             <div className="flex flex-col items-start space-y-4">
-                <h1 className="text-2xl font-semibold tracking-[-0.03em] t-primary">
+                <h1 className="text-[2rem] font-semibold tracking-[-0.045em] t-primary">
                     {confirm?.title}
                 </h1>
                 <p className="text-base leading-7 t-primary">

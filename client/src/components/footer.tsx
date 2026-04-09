@@ -90,11 +90,11 @@ function Footer() {
                 <link rel="alternate" type="application/atom+xml" title={siteName} href="/atom.xml" />
                 <link rel="alternate" type="application/json" title={siteName} href="/rss.json" />
             </Helmet>
-            <div className="mx-auto mb-6 mt-8 w-full max-w-3xl px-4 ani-show">
-                <SurfaceCard className="p-4 sm:p-5">
+            <div className="mx-auto mb-8 mt-10 w-full max-w-3xl px-4 ani-show">
+                <SurfaceCard className="p-5 sm:p-6">
                     <div className="flex flex-col items-center justify-center space-y-3 text-center t-primary">
                         <div ref={footerHtmlRef} />
-                        <p className='text-sm text-neutral-500 font-normal link-line'>
+                        <p className='text-sm text-slate-500 font-normal link-line'>
                             <span onDoubleClick={() => {
                                 if(doubleClickTimes >= 2){ // actually need 3 times doubleClick
                                     setDoubleClickTimes(0)
@@ -117,7 +117,7 @@ function Footer() {
                                     position="top center"
                                     arrow={false}
                                     closeOnDocumentClick>
-                                    <div className="min-w-52 rounded-2xl border border-black/10 bg-w p-4 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] dark:border-white/10">
+                                    <div className="min-w-52 rounded-[24px] border border-black/8 bg-w p-4 shadow-[0_24px_64px_-40px_rgba(73,101,133,0.34)] backdrop-blur-xl dark:border-white/10 dark:shadow-[0_24px_64px_-36px_rgba(2,6,23,0.82)]">
                                         <p className='font-bold t-primary'>
                                             {t('footer.rss')}
                                         </p>
@@ -136,7 +136,7 @@ function Footer() {
                                 </Popup>
                             </>}
                         </p>
-                        <div className="inline-flex rounded-full border border-zinc-200 bg-black/[0.02] p-[3px] dark:border-zinc-700 dark:bg-white/[0.03]">
+                        <div className="inline-flex rounded-full border border-slate-200/80 bg-[rgba(241,246,251,0.88)] p-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] dark:border-slate-700 dark:bg-white/[0.03]">
                             <ThemeButton mode='light' current={modeState} label="Toggle light mode" icon="ri-sun-line" onClick={setMode} />
                             <ThemeButton mode='system' current={modeState} label="Toggle system mode" icon="ri-computer-line" onClick={setMode} />
                             <ThemeButton mode='dark' current={modeState} label="Toggle dark mode" icon="ri-moon-line" onClick={setMode} />
@@ -157,7 +157,7 @@ function Spliter() {
 
 function ThemeButton({ current, mode, label, icon, onClick }: { current: ThemeMode, label: string, mode: ThemeMode, icon: string, onClick: (mode: ThemeMode) => void }) {
     return (<button aria-label={label} type="button" onClick={() => onClick(mode)}
-        className={`rounded-inherit inline-flex h-[32px] w-[32px] items-center justify-center border-0 t-primary transition-colors ${current === mode ? "bg-w rounded-full shadow-xl shadow-light" : "hover:bg-black/5 dark:hover:bg-white/10"}`}>
+        className={`rounded-inherit inline-flex h-[34px] w-[34px] items-center justify-center border-0 t-primary transition-all duration-200 ${current === mode ? "bg-w rounded-full shadow-[0_16px_30px_-22px_rgba(73,101,133,0.35)]" : "hover:bg-black/5 dark:hover:bg-white/10"}`}>
         <i className={`${icon}`} />
     </button>)
 }

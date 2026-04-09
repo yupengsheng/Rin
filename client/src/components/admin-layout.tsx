@@ -43,16 +43,16 @@ export function AdminLayout({
   const siteConfig = useSiteConfig();
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row lg:px-6">
+    <div className="min-h-screen bg-[linear-gradient(180deg,rgba(245,248,252,0.94),rgba(236,243,249,0.96))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,0.94))]">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row lg:px-6 lg:py-8">
         <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-72 lg:self-start">
-          <div className="rounded-2xl border border-black/10 bg-w p-5 dark:border-white/10">
-            <Link href="/" className="flex items-center gap-4 rounded-xl px-2 py-2 transition-colors hover:bg-neutral-50 dark:hover:bg-white/5">
+          <div className="rounded-[32px] border border-black/8 bg-w p-5 shadow-[0_26px_70px_-52px_rgba(73,101,133,0.34)] backdrop-blur-xl dark:border-white/10 dark:shadow-[0_28px_76px_-52px_rgba(2,6,23,0.78)]">
+            <Link href="/" className="flex items-center gap-4 rounded-[22px] px-3 py-3 transition-colors hover:bg-[rgba(240,245,251,0.92)] dark:hover:bg-white/5">
               {siteConfig.avatar ? (
-                <img src={siteConfig.avatar} alt="Avatar" className="h-12 w-12 rounded-2xl border border-black/10 dark:border-white/10" />
+                <img src={siteConfig.avatar} alt="Avatar" className="h-12 w-12 rounded-[18px] border border-black/8 dark:border-white/10" />
               ) : null}
               <div className="min-w-0">
-                <p className="truncate text-base font-semibold t-primary">{siteConfig.name}</p>
+                <p className="truncate text-base font-semibold tracking-[-0.02em] t-primary">{siteConfig.name}</p>
                 <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">{t("admin.back_to_site")}</p>
               </div>
             </Link>
@@ -72,11 +72,11 @@ export function AdminLayout({
         </aside>
 
         <main className="min-w-0 flex-1">
-          <div className="rounded-2xl border border-black/10 bg-w p-6 dark:border-white/10">
+          <div className="rounded-[34px] border border-black/8 bg-w p-6 shadow-[0_28px_80px_-56px_rgba(73,101,133,0.34)] backdrop-blur-xl dark:border-white/10 dark:shadow-[0_28px_80px_-54px_rgba(2,6,23,0.8)]">
             <div className="border-b border-black/5 pb-5 dark:border-white/5">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-theme/70">{t("admin.title")}</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] t-primary">{title}</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500 dark:text-neutral-400">{description}</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] t-primary">{title}</h1>
+              <p className="mt-3 max-w-2xl text-[15px] leading-7 text-neutral-500 dark:text-neutral-400">{description}</p>
             </div>
             <div className="mt-6">{children}</div>
           </div>

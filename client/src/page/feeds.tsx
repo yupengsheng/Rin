@@ -78,24 +78,24 @@ export function FeedsPage() {
             </Helmet>
             <Waiting for={feeds.draft.size + feeds.normal.size + feeds.unlisted.size > 0 || status === 'idle'}>
                 <PageShell>
-                    <div className="mx-auto w-full max-w-5xl space-y-6">
+                    <div className="mx-auto w-full max-w-5xl space-y-8">
                         <PageIntro
                             eyebrow={t('article.title')}
                             title={listState === 'draft' ? t('draft_bin') : listState === 'normal' ? t('article.title') : t('unlisted')}
                             description={t('article.total$count', { count: feeds[listState]?.size })}
                             action={profile?.permission ? (
-                                <div className="flex flex-row gap-2 rounded-full border border-black/10 bg-w p-1 dark:border-white/10">
-                                    <Link href={listState === 'draft' ? '/?type=normal' : '/?type=draft'} className={`rounded-full px-3 py-1.5 text-sm transition-colors ${listState === 'draft' ? "bg-theme text-white" : "t-secondary hover:bg-black/5 dark:hover:bg-white/10"}`}>
+                                <div className="flex flex-row gap-2 rounded-full border border-black/8 bg-w p-1.5 shadow-[0_18px_42px_-30px_rgba(73,101,133,0.24)] backdrop-blur-xl dark:border-white/10 dark:shadow-[0_18px_42px_-30px_rgba(2,6,23,0.68)]">
+                                    <Link href={listState === 'draft' ? '/?type=normal' : '/?type=draft'} className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${listState === 'draft' ? "bg-theme text-white shadow-[0_14px_30px_-22px_rgba(73,101,133,0.42)]" : "t-secondary hover:bg-black/5 dark:hover:bg-white/10"}`}>
                                         {t('draft_bin')}
                                     </Link>
-                                    <Link href={listState === 'unlisted' ? '/?type=normal' : '/?type=unlisted'} className={`rounded-full px-3 py-1.5 text-sm transition-colors ${listState === 'unlisted' ? "bg-theme text-white" : "t-secondary hover:bg-black/5 dark:hover:bg-white/10"}`}>
+                                    <Link href={listState === 'unlisted' ? '/?type=normal' : '/?type=unlisted'} className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${listState === 'unlisted' ? "bg-theme text-white shadow-[0_14px_30px_-22px_rgba(73,101,133,0.42)]" : "t-secondary hover:bg-black/5 dark:hover:bg-white/10"}`}>
                                         {t('unlisted')}
                                     </Link>
                                 </div>
                             ) : undefined}
                         />
                         <Waiting for={status === 'idle'}>
-                            <SurfaceCard className="p-5 sm:p-6">
+                            <SurfaceCard className="p-5 sm:p-7">
                                 {feeds[listState].data.length ? (
                                     <div className={feedListClass}>
                                         {feeds[listState].data.map(({ id, ...feed }: any) => (
@@ -108,17 +108,17 @@ export function FeedsPage() {
                                         description={t("article.empty_description")}
                                     />
                                 )}
-                                <div className="mt-6 flex flex-row items-center ani-show">
+                                <div className="mt-8 flex flex-row items-center ani-show">
                                     {page > 1 &&
                                         <Link href={`/?type=${listState}&page=${(page - 1)}`}
-                                            className={`text-sm font-normal rounded-full px-4 py-2 text-white bg-theme`}>
+                                            className={`rounded-[18px] px-4 py-2.5 text-sm font-medium text-white bg-theme shadow-[0_18px_40px_-22px_rgba(73,101,133,0.48)] transition-all hover:-translate-y-[1px]`}>
                                             {t('previous')}
                                         </Link>
                                     }
                                     <div className="flex-1" />
                                     {feeds[listState]?.hasNext &&
                                         <Link href={`/?type=${listState}&page=${(page + 1)}`}
-                                            className={`text-sm font-normal rounded-full px-4 py-2 text-white bg-theme`}>
+                                            className={`rounded-[18px] px-4 py-2.5 text-sm font-medium text-white bg-theme shadow-[0_18px_40px_-22px_rgba(73,101,133,0.48)] transition-all hover:-translate-y-[1px]`}>
                                             {t('next')}
                                         </Link>
                                     }

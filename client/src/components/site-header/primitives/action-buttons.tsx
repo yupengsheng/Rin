@@ -55,7 +55,7 @@ export function SearchButton({ className, onClose, plain = false }: { className?
         className={
           plain
             ? "flex aspect-[1] items-center justify-center px-1.5 text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-            : "flex rounded-full border dark:border-neutral-600 px-2 bg-w aspect-[1] items-center justify-center t-primary bg-button"
+            : "flex rounded-[16px] border border-black/8 dark:border-white/10 px-2.5 py-2 bg-w aspect-[1] items-center justify-center t-primary bg-button shadow-[0_16px_36px_-26px_rgba(73,101,133,0.28)] backdrop-blur-xl"
         }
       >
         <i className="ri-search-line" />
@@ -114,7 +114,7 @@ export function LanguageSwitch({ className, plain = false, popoverUp = false }: 
             className={
               plain
                 ? "flex aspect-[1] items-center justify-center px-1.5 text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                : "flex rounded-full border dark:border-neutral-600 px-2 bg-w aspect-[1] items-center justify-center t-primary bg-button"
+                : "flex rounded-[16px] border border-black/8 dark:border-white/10 px-2.5 py-2 bg-w aspect-[1] items-center justify-center t-primary bg-button shadow-[0_16px_36px_-26px_rgba(73,101,133,0.28)] backdrop-blur-xl"
             }
           >
             <i className="ri-translate-2" />
@@ -176,7 +176,7 @@ export function UserAvatar({
               className={
                 plain
                   ? "group flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-neutral-500 transition-all hover:bg-black/5 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-neutral-100"
-                  : "flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-w dark:border-white/10"
+                  : "flex h-9 w-9 items-center justify-center overflow-hidden rounded-[16px] border border-black/8 bg-w shadow-[0_16px_36px_-26px_rgba(73,101,133,0.28)] backdrop-blur-xl dark:border-white/10"
               }
             >
               {profile.avatar ? (

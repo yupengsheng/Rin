@@ -164,14 +164,14 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
             <div className="xl:w-64" />
             <main className="wauto">
               <article
-                className="rounded-2xl bg-w m-2 px-6 py-4"
+                className="m-2 rounded-[36px] bg-w px-7 py-6 shadow-[0_34px_92px_-60px_rgba(73,101,133,0.34)]"
                 aria-label={feed.title ?? "Unnamed"}
               >
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-6">
                   <div>
-                    <div className="mt-1 mb-1 flex gap-1">
+                    <div className="mt-1 mb-2 flex flex-wrap gap-2">
                       <p
-                        className="text-gray-400 text-[12px]"
+                        className="text-slate-400 text-[12px] font-medium uppercase tracking-[0.16em]"
                         title={new Date(feed.createdAt).toLocaleString()}
                       >
                         {t("feed_card.published$time", {
@@ -181,7 +181,7 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
 
                       {feed.createdAt !== feed.updatedAt && (
                         <p
-                          className="text-gray-400 text-[12px]"
+                          className="text-slate-400 text-[12px] font-medium uppercase tracking-[0.16em]"
                           title={new Date(feed.updatedAt).toLocaleString()}
                         >
                           {t("feed_card.updated$time", {
@@ -190,7 +190,7 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                         </p>
                       )}
                     </div>
-                    {counterEnabled && <p className='text-[12px] text-gray-400 font-normal link-line'>
+                    {counterEnabled && <p className='text-[12px] text-slate-400 font-medium uppercase tracking-[0.16em] link-line'>
                       <span> {t("count.pv")} </span>
                       <span>
                         {feed.pv}
@@ -202,7 +202,7 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                       </span>
                     </p>}
                     <div className="flex flex-row items-center">
-                      <h1 className="text-2xl font-bold t-primary break-all">
+                      <h1 className="text-[2.55rem] font-semibold tracking-[-0.05em] t-primary break-all">
                         {feed.title}
                       </h1>
                       <div className="flex-1 w-0" />
@@ -242,14 +242,27 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                     )}
                   </div>
                 </div>
+                <div className="mt-6 h-px bg-[linear-gradient(90deg,rgba(148,163,184,0.08),rgba(148,163,184,0.46),rgba(148,163,184,0.08))]" />
                 <Markdown content={feed.content} />
                 {feed.hashtags.length > 0 && (
-                  <div className="mt-6 flex flex-row flex-wrap gap-x-2">
+                  <div className="mt-8 flex flex-row flex-wrap gap-x-2 gap-y-2">
                     {feed.hashtags.map(({ name }, index) => (
                       <HashTag key={index} name={name} />
                     ))}
                   </div>
                 )}
+                <div className="mt-8 rounded-[24px] border border-black/5 bg-secondary/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={feed.user.avatar || "/avatar.png"}
+                      className="h-10 w-10 rounded-[16px] object-cover"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold tracking-[-0.01em] t-primary">{feed.user.username}</p>
+                      <p className="text-sm t-secondary">{siteConfig.name}</p>
+                    </div>
+                  </div>
+                </div>
               </article>
               <AdjacentSection id={id} setError={setError} />
               {feed && <Comments id={`${feed.id}`} />}
@@ -400,35 +413,35 @@ function CommentInput({
   return (
     <div
       ref={containerRef}
-      className="w-full rounded-[28px] border border-black/10 bg-w p-6 t-primary shadow-[0_24px_70px_-48px_rgba(15,23,42,0.45)] dark:border-white/10"
+      className="w-full rounded-[34px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(243,248,253,0.88))] p-6 t-primary shadow-[0_34px_94px_-60px_rgba(73,101,133,0.34)] backdrop-blur-xl dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(30,41,59,0.78))] dark:shadow-[0_34px_94px_-58px_rgba(2,6,23,0.84)]"
     >
-      <div className="mb-6 flex items-center gap-3">
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-theme/20 bg-theme/10 text-theme">
+      <div className="mb-7 flex items-center gap-4">
+        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-theme/20 bg-theme/10 text-theme shadow-[0_16px_32px_-24px_rgba(73,101,133,0.4)]">
           <i className="ri-chat-3-line text-base" />
         </span>
         <div className="min-w-0">
-          <label htmlFor="comment" className="text-2xl font-semibold tracking-[-0.025em]">{t("comment.form.title")}</label>
-          <p className="mt-0.5 text-[13px] leading-5 t-secondary">{t("comment.form.desc")}</p>
+          <label htmlFor="comment" className="text-[2rem] font-semibold tracking-[-0.045em]">{t("comment.form.title")}</label>
+          <p className="mt-1 text-[14px] leading-6 t-secondary">{t("comment.form.desc")}</p>
         </div>
       </div>
       {successMessage ? (
-        <div className="mb-4 rounded-2xl border border-emerald-200/70 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200" aria-live="polite">
+        <div className="mb-5 rounded-[22px] border border-emerald-200/70 bg-[rgba(241,252,248,0.92)] px-4 py-3 text-sm text-emerald-700 shadow-[0_18px_40px_-30px_rgba(16,185,129,0.24)] dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200" aria-live="polite">
           {successMessage}
         </div>
       ) : null}
       {error ? (
-        <div className="mb-4 rounded-2xl border border-red-200/70 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-200" aria-live="polite">
+        <div className="mb-5 rounded-[22px] border border-red-200/70 bg-[rgba(255,244,244,0.92)] px-4 py-3 text-sm text-red-700 shadow-[0_18px_40px_-30px_rgba(225,29,72,0.22)] dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-200" aria-live="polite">
           {error}
         </div>
       ) : null}
       {replyTarget ? (
-        <div className="mb-4 w-full rounded-2xl border border-theme/20 bg-theme/5 px-4 py-3 dark:border-theme/25 dark:bg-theme/10">
+        <div className="mb-5 w-full rounded-[24px] border border-theme/20 bg-[linear-gradient(180deg,rgba(var(--theme-rgb),0.08),rgba(255,255,255,0.36))] px-4 py-3 shadow-[0_18px_38px_-30px_rgba(73,101,133,0.22)] dark:border-theme/25 dark:bg-theme/10">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-theme">
+              <p className="text-sm font-semibold tracking-[-0.01em] text-theme">
                 {t("comment.reply.replying_to$name", { name: replyTarget.author.name })}
               </p>
-              <p className="mt-1 truncate text-sm t-secondary">{replyTarget.content}</p>
+              <p className="mt-1 truncate text-sm leading-6 t-secondary">{replyTarget.content}</p>
             </div>
             <button
               className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm t-secondary transition-colors hover:bg-black/5 hover:text-neutral-900 dark:hover:bg-white/10 dark:hover:text-white"
@@ -450,7 +463,7 @@ function CommentInput({
           ref={textareaRef}
           id="comment"
           placeholder={t("comment.placeholder.title")}
-          className="h-40 w-full rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+          className="h-44 w-full rounded-[24px] border border-black/8 bg-[rgba(255,255,255,0.86)] px-4 py-3 text-sm leading-7 t-primary outline-none transition-all placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:bg-[rgba(15,23,42,0.62)] dark:placeholder:text-neutral-500"
           value={content}
           disabled={isSubmitting}
           required
@@ -460,14 +473,14 @@ function CommentInput({
           }}
         />
       </div>
-      <div className="mt-4 grid w-full gap-4 md:grid-cols-2">
+      <div className="mt-5 grid w-full gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-[13px] font-semibold t-primary">
             <span>{t("comment.form.author_name")}</span>
             <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[10px] font-semibold text-theme">{t("comment.form.required_label")}</span>
           </label>
           <input
-            className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+            className="rounded-[22px] border border-black/8 bg-[rgba(255,255,255,0.86)] px-4 py-3 text-sm t-primary outline-none transition-all placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:bg-[rgba(15,23,42,0.62)] dark:placeholder:text-neutral-500"
             value={authorName}
             autoComplete="name"
             disabled={isSubmitting}
@@ -484,7 +497,7 @@ function CommentInput({
             <span className="rounded-full bg-theme/10 px-2 py-0.5 text-[10px] font-semibold text-theme">{t("comment.form.required_label")}</span>
           </label>
           <input
-            className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+            className="rounded-[22px] border border-black/8 bg-[rgba(255,255,255,0.86)] px-4 py-3 text-sm t-primary outline-none transition-all placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:bg-[rgba(15,23,42,0.62)] dark:placeholder:text-neutral-500"
             value={authorEmail}
             type="email"
             autoComplete="email"
@@ -503,7 +516,7 @@ function CommentInput({
             <span className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-semibold t-secondary dark:bg-white/10">{t("comment.form.optional_label")}</span>
           </label>
           <input
-            className="rounded-2xl border border-black/10 bg-w px-4 py-3 text-sm t-primary outline-none transition-colors placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:placeholder:text-neutral-500"
+            className="rounded-[22px] border border-black/8 bg-[rgba(255,255,255,0.86)] px-4 py-3 text-sm t-primary outline-none transition-all placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:bg-[rgba(15,23,42,0.62)] dark:placeholder:text-neutral-500"
             value={authorUrl}
             type="url"
             autoComplete="url"
@@ -515,7 +528,7 @@ function CommentInput({
           />
         </div>
       </div>
-      <div className="mt-5 flex w-full flex-col gap-4 border-t border-black/5 pt-4 dark:border-white/10">
+      <div className="mt-6 flex w-full flex-col gap-4 border-t border-black/5 pt-5 dark:border-white/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
@@ -590,13 +603,13 @@ function Comments({ id }: { id: string }) {
   return (
     <>
       {config.getBoolean('comment.enabled') &&
-        <section className="m-2 mt-8 w-full rounded-[32px] border border-black/10 bg-gradient-to-b from-white via-white to-black/[0.02] p-3 shadow-[0_30px_90px_-65px_rgba(15,23,42,0.45)] dark:border-white/10 dark:from-dark dark:via-dark dark:to-white/[0.02] sm:p-4">
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-[26px] border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+        <section className="m-2 mt-8 w-full rounded-[36px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(238,245,251,0.9))] p-3 shadow-[0_34px_96px_-66px_rgba(73,101,133,0.32)] backdrop-blur-xl dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.8),rgba(30,41,59,0.78))] sm:p-4">
+          <div className="mb-5 flex items-center justify-between gap-3 rounded-[28px] border border-black/5 bg-[rgba(245,249,253,0.76)] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] dark:border-white/10 dark:bg-white/[0.03]">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-theme/75">{t("comment.title")}</p>
-              <p className="mt-1 text-sm t-secondary">{t("comment.list.count$count", { count: totalComments })}</p>
+              <p className="mt-1 text-sm leading-6 t-secondary">{t("comment.list.count$count", { count: totalComments })}</p>
             </div>
-            <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-theme/20 bg-theme/10 px-3 text-sm font-semibold text-theme">
+            <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-theme/20 bg-theme/10 px-3 text-sm font-semibold text-theme shadow-[0_14px_30px_-24px_rgba(73,101,133,0.34)]">
               {totalComments}
             </span>
           </div>
@@ -651,11 +664,11 @@ function CommentThread({
   onReply: (comment: ApiComment) => void;
 }) {
   return (
-    <div className="relative space-y-3 pl-4 before:absolute before:bottom-2 before:left-[6px] before:top-6 before:w-px before:bg-black/[0.08] dark:before:bg-white/10">
-      <span className="absolute left-0 top-5 h-3 w-3 rounded-full border-2 border-white bg-theme shadow-[0_0_0_4px_rgba(252,70,107,0.12)] dark:border-dark" />
+    <div className="relative space-y-4 pl-4 before:absolute before:bottom-2 before:left-[7px] before:top-6 before:w-px before:bg-black/[0.08] dark:before:bg-white/10">
+      <span className="absolute left-0 top-5 h-3.5 w-3.5 rounded-full border-2 border-white bg-theme shadow-[0_0_0_5px_rgba(111,143,179,0.12)] dark:border-dark" />
       <CommentItem comment={comment} onRefresh={onRefresh} onReply={onReply} />
       {replies.length > 0 ? (
-        <div className="ml-2 space-y-3 border-l border-black/[0.08] pl-5 dark:border-white/10">
+        <div className="ml-3 space-y-3 border-l border-black/[0.08] pl-5 dark:border-white/10">
           {replies.map((reply) => (
             <CommentItem key={reply.id} comment={reply} onRefresh={onRefresh} onReply={onReply} compact />
           ))}
@@ -700,33 +713,33 @@ function CommentItem({
 
   return (
     <div
-      className={`rounded-2xl border p-4 ${
+      className={`rounded-[24px] border p-4 ${
         compact
-          ? "border-black/5 bg-black/[0.015] dark:border-white/10 dark:bg-white/[0.03]"
-          : "border-black/10 bg-w shadow-[0_22px_50px_-42px_rgba(15,23,42,0.55)] dark:border-white/10"
+          ? "border-black/5 bg-[rgba(241,246,251,0.72)] dark:border-white/10 dark:bg-white/[0.03]"
+          : "border-black/8 bg-[rgba(255,255,255,0.82)] shadow-[0_24px_60px_-44px_rgba(73,101,133,0.24)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgba(15,23,42,0.58)]"
       }`}
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
           {comment.author.url ? (
-            <a href={comment.author.url} target="_blank" rel="noreferrer" className="text-base font-bold t-primary hover:text-theme hover:underline">
+            <a href={comment.author.url} target="_blank" rel="noreferrer" className="text-[15px] font-semibold tracking-[-0.01em] t-primary hover:text-theme hover:underline">
               {comment.author.name}
             </a>
           ) : (
-            <span className="text-base font-bold t-primary">{comment.author.name}</span>
+            <span className="text-[15px] font-semibold tracking-[-0.01em] t-primary">{comment.author.name}</span>
           )}
           {comment.author.isAdmin ? (
             <span className="rounded-full bg-theme/10 px-2 py-0.5 text-xs font-medium text-theme">{t("admin.title")}</span>
           ) : null}
           <span className="hidden text-neutral-300 sm:inline">·</span>
-          <span title={new Date(comment.createdAt).toLocaleString()} className="text-sm t-secondary">
+          <span title={new Date(comment.createdAt).toLocaleString()} className="text-sm text-slate-400">
             {timeago(comment.createdAt)}
           </span>
         </div>
         {comment.replyTo ? (
-          <blockquote className="rounded-2xl border border-theme/20 bg-gradient-to-r from-theme/10 to-theme/5 px-4 py-3 text-sm text-neutral-600 dark:border-theme/20 dark:from-theme/10 dark:to-theme/5 dark:text-neutral-300">
-            <p className="font-medium t-primary">{t("comment.reply.quote$name", { name: comment.replyTo.authorName })}</p>
-            <p className="truncate">{comment.replyTo.contentPreview}</p>
+          <blockquote className="rounded-[18px] border border-theme/20 bg-gradient-to-r from-theme/10 to-[rgba(255,255,255,0.72)] px-4 py-3 text-sm text-neutral-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-theme/20 dark:from-theme/10 dark:to-theme/5 dark:text-neutral-300">
+            <p className="font-medium tracking-[-0.01em] t-primary">{t("comment.reply.quote$name", { name: comment.replyTo.authorName })}</p>
+            <p className="mt-1 truncate leading-6">{comment.replyTo.contentPreview}</p>
           </blockquote>
         ) : null}
         <p className="break-words whitespace-pre-wrap text-[15px] leading-7 t-primary">{comment.content}</p>

@@ -39,7 +39,7 @@ function QueueStatusEntry({
         badge={<SettingsBadge tone={item.aiSummaryStatus === "completed" ? "success" : item.aiSummaryStatus === "failed" ? "neutral" : "warning"}>{t(`queue_status.status.${item.aiSummaryStatus}`)}</SettingsBadge>}
       />
       <SettingsCardBody>
-        <div className="space-y-2 text-sm text-neutral-600 dark:text-neutral-300">
+        <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
           <p>{t("queue_status.feed_id", { id: item.id })}</p>
           <p>{t("queue_status.updated_at", { date: new Date(item.updatedAt).toLocaleString() })}</p>
           {item.aiSummaryError ? (
@@ -148,13 +148,13 @@ export function QueueStatusPage() {
       </div>
 
       {generatedAt ? (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {t("queue_status.generated_at", { date: new Date(generatedAt).toLocaleString() })}
         </p>
       ) : null}
 
       {loading ? (
-        <div className="flex items-center gap-3 py-8 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-3 rounded-[24px] border border-black/5 bg-w/60 px-4 py-6 text-sm text-slate-500 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400">
           <ReactLoading width="1.25em" height="1.25em" type="spin" color="#FC466B" />
           <span>{t("queue_status.loading")}</span>
         </div>

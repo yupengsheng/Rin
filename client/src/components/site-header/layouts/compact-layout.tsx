@@ -9,7 +9,7 @@ export const compactLayoutDefinition: HeaderLayoutDefinition = {
   renderDesktop({ children, profile, siteConfig, isAtTop }) {
     return (
       <div className="hidden w-full lg:block">
-        <div className={`flex items-center justify-between gap-8 px-4 py-3 ${isAtTop ? "bg-transparent backdrop-blur-none" : "bg-white/20 backdrop-blur-xl dark:bg-white/[0.03]"}`}>
+        <div className={`flex items-center justify-between gap-8 rounded-[28px] border border-transparent px-4 py-3 transition-all duration-300 ${isAtTop ? "bg-transparent backdrop-blur-none" : "border-black/6 bg-[rgba(255,255,255,0.62)] shadow-[0_20px_52px_-38px_rgba(73,101,133,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04] dark:shadow-[0_20px_52px_-38px_rgba(2,6,23,0.72)]"}`}>
           <BrandLink
             siteConfig={siteConfig}
             compact

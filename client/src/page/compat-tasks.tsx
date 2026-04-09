@@ -117,13 +117,13 @@ export function CompatTasksPage() {
       <AlertUI />
 
       {generatedAt ? (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {t("compat_tasks.generated_at", { date: new Date(generatedAt).toLocaleString() })}
         </p>
       ) : null}
 
       {loading ? (
-        <div className="flex items-center gap-3 py-8 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-3 rounded-[24px] border border-black/5 bg-w/60 px-4 py-6 text-sm text-slate-500 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400">
           <ReactLoading width="1.25em" height="1.25em" type="spin" color="#FC466B" />
           <span>{t("compat_tasks.loading")}</span>
         </div>
@@ -142,7 +142,7 @@ export function CompatTasksPage() {
               }
             />
             <SettingsCardBody>
-              <div className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+              <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
                 <p>{t("compat_tasks.ai_summary.enabled", { value: status.aiSummary.enabled ? t("compat_tasks.yes") : t("compat_tasks.no") })}</p>
                 <p>{t("compat_tasks.ai_summary.queue_configured", { value: status.aiSummary.queueConfigured ? t("compat_tasks.yes") : t("compat_tasks.no") })}</p>
                 <p>{t("compat_tasks.ai_summary.force_eligible", { count: status.aiSummary.forceEligible })}</p>
@@ -173,7 +173,7 @@ export function CompatTasksPage() {
               }
             />
             <SettingsCardBody>
-              <div className="space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+              <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
                 <p>{t("compat_tasks.blurhash.note")}</p>
                 {runningTask === "blurhash" ? (
                   <p>

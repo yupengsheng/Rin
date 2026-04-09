@@ -191,9 +191,23 @@ export function Settings() {
       <Helmet>
         <title>{`${t("settings.title")} - ${siteConfig.name}`}</title>
       </Helmet>
-      <main className="w-full rounded-2xl bg-w" aria-label={t("main_content")}>
-        <div className="flex flex-col items-start space-y-2">
-          {(loading || saving) && <ReactLoading width="1em" height="1em" type="spin" color="#FC466B" />}
+      <main className="w-full rounded-[32px] bg-w px-1 py-1" aria-label={t("main_content")}>
+        <div className="mb-6 rounded-[28px] border border-black/5 bg-[linear-gradient(180deg,rgba(246,250,254,0.9),rgba(255,255,255,0.72))] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.38),rgba(15,23,42,0.12))]">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-theme/70">{t("admin.title")}</p>
+              <h1 className="mt-2 text-[2.4rem] font-semibold tracking-[-0.05em] t-primary">{t("settings.title")}</h1>
+              <p className="mt-3 max-w-2xl text-[15px] leading-7 t-secondary">{t("admin.settings_description")}</p>
+            </div>
+            {(loading || saving) ? (
+              <div className="inline-flex items-center gap-3 rounded-full border border-black/5 bg-w px-4 py-2 text-sm t-secondary shadow-[0_16px_36px_-26px_rgba(73,101,133,0.22)] dark:border-white/10">
+                <ReactLoading width="1em" height="1em" type="spin" color="#6f8fb3" />
+                <span>{saving ? t("save") : t("settings.loading")}</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex flex-col items-start space-y-3">
           <ItemTitle title={t("settings.site.title")} />
           <ItemInput
             title={t("settings.site.name.title")}
@@ -608,38 +622,46 @@ export function Settings() {
               setConfigValue("client", "cache.enabled", checked);
             }}
           />
-          <ItemButton
-            title={t("settings.cache.clear.title")}
-            description={t("settings.cache.clear.desc")}
-            buttonTitle={t("clear")}
-            onConfirm={async () => {
-              await client.config.clearCache().then(({ error }) => {
-                if (error) {
-                  showAlert(t("settings.cache.clear_failed$message", { message: error.value }));
-                }
-              });
-            }}
-            alertTitle={t("settings.cache.clear.confirm.title")}
-            alertDescription={t("settings.cache.clear.confirm.desc")}
-          />
-          <div className="w-full">
-            <SettingsCard>
-              <SettingsCardRow
-                header={
-                  <SettingsCardHeader
-                    title={t("settings.backup.title")}
-                    description={t("settings.backup.desc")}
-                  />
-                }
-                action={
-                  <Button
-                    title={exportingBackup ? t("settings.backup.export.exporting") : t("settings.backup.export.button")}
-                    onClick={handleExportBackup}
-                    disabled={exportingBackup}
-                  />
-                }
+          <div className="w-full rounded-[30px] border border-black/5 bg-[linear-gradient(180deg,rgba(243,248,253,0.88),rgba(255,255,255,0.68))] p-4 shadow-[0_22px_58px_-44px_rgba(73,101,133,0.18)] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.36),rgba(15,23,42,0.12))]">
+            <div className="mb-3 px-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-theme/70">{t("settings.maintenance.title")}</p>
+              <p className="mt-2 text-sm leading-6 t-secondary">{t("admin.settings_description")}</p>
+            </div>
+            <div className="space-y-3">
+              <ItemButton
+                title={t("settings.cache.clear.title")}
+                description={t("settings.cache.clear.desc")}
+                buttonTitle={t("clear")}
+                onConfirm={async () => {
+                  await client.config.clearCache().then(({ error }) => {
+                    if (error) {
+                      showAlert(t("settings.cache.clear_failed$message", { message: error.value }));
+                    }
+                  });
+                }}
+                alertTitle={t("settings.cache.clear.confirm.title")}
+                alertDescription={t("settings.cache.clear.confirm.desc")}
               />
-            </SettingsCard>
+              <div className="w-full">
+                <SettingsCard>
+                  <SettingsCardRow
+                    header={
+                      <SettingsCardHeader
+                        title={t("settings.backup.title")}
+                        description={t("settings.backup.desc")}
+                      />
+                    }
+                    action={
+                      <Button
+                        title={exportingBackup ? t("settings.backup.export.exporting") : t("settings.backup.export.button")}
+                        onClick={handleExportBackup}
+                        disabled={exportingBackup}
+                      />
+                    }
+                  />
+                </SettingsCard>
+              </div>
+            </div>
           </div>
           <ItemWithUpload
             title={t("settings.wordpress.title")}
@@ -649,7 +671,7 @@ export function Settings() {
           />
 
           {hasUnsavedChanges && (
-            <div className="sticky bottom-4 z-20 mt-6 w-full pb-2">
+            <div className="sticky bottom-4 z-20 mt-8 w-full pb-2">
               <SettingsCard tone="warning">
               <SettingsCardRow
                 header={

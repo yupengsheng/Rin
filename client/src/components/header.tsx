@@ -72,7 +72,7 @@ export function Header({ children }: { children?: React.ReactNode }) {
   return (
     <>
       {headerLayout === "compact" ? (
-        <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-64 bg-gradient-to-b from-theme/15 to-white/0 dark:from-theme/20 dark:to-transparent" />
+        <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,rgba(var(--theme-rgb),0.18),transparent_52%),linear-gradient(180deg,rgba(241,246,251,0.85),transparent)] dark:bg-[radial-gradient(circle_at_top,rgba(var(--theme-rgb),0.22),transparent_48%),linear-gradient(180deg,rgba(15,23,42,0.82),transparent)]" />
       ) : null}
       <div ref={headerRef} className={containerClassName}>
         <div className="w-screen">

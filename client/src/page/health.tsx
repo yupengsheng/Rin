@@ -101,13 +101,13 @@ export function HealthPage() {
       </div>
 
       {generatedAt ? (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {t("health.generated_at", { date: new Date(generatedAt).toLocaleString() })}
         </p>
       ) : null}
 
       {loading ? (
-        <div className="flex items-center gap-3 py-8 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-3 rounded-[24px] border border-black/5 bg-w/60 px-4 py-6 text-sm text-slate-500 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400">
           <ReactLoading width="1.25em" height="1.25em" type="spin" color="#FC466B" />
           <span>{t("health.loading")}</span>
         </div>
