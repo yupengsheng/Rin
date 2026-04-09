@@ -144,7 +144,7 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
           />
         </Helmet>
       )}
-      <div className="w-full flex flex-row justify-center ani-show">
+      <div className="w-full ani-show">
         {error && (
           <>
             <div className="flex flex-col wauto rounded-2xl bg-w m-2 p-6 items-center justify-center space-y-2">
@@ -160,9 +160,8 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
           </>
         )}
         {feed && !error && (
-          <>
-            <div className="xl:w-64" />
-            <main className="wauto">
+          <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-6 px-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start xl:px-6">
+            <main className="min-w-0">
               <article
                 className="m-2 rounded-[36px] bg-w px-7 py-6 shadow-[0_34px_92px_-60px_rgba(73,101,133,0.34)]"
                 aria-label={feed.title ?? "Unnamed"}
@@ -256,14 +255,12 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
               {feed && <Comments id={`${feed.id}`} />}
               <div className="h-16" />
             </main>
-            <div className="w-80 hidden lg:block relative">
-              <div
-                className={`start-0 end-0 top-[5.5rem] sticky`}
-              >
+            <aside className="relative hidden xl:block">
+              <div className="sticky top-[5.5rem]">
                 <TOC />
               </div>
-            </div>
-          </>
+            </aside>
+          </div>
         )}
       </div>
       <AlertUI />
