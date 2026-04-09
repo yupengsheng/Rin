@@ -251,18 +251,6 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                     ))}
                   </div>
                 )}
-                <div className="mt-8 rounded-[24px] border border-black/5 bg-secondary/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={feed.user.avatar || "/avatar.png"}
-                      className="h-10 w-10 rounded-[16px] object-cover"
-                    />
-                    <div>
-                      <p className="text-sm font-semibold tracking-[-0.01em] t-primary">{feed.user.username}</p>
-                      <p className="text-sm t-secondary">{siteConfig.name}</p>
-                    </div>
-                  </div>
-                </div>
               </article>
               <AdjacentSection id={id} setError={setError} />
               {feed && <Comments id={`${feed.id}`} />}
