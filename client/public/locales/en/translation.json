@@ -102,6 +102,7 @@
     "author_name_required": "Name is required",
     "empty": "Comment cannot be empty",
     "form": {
+      "author_email_placeholder": "Will not be shown publicly",
       "author_email": "Email",
       "author_name": "Your Name",
       "author_url": "Website",
@@ -122,6 +123,7 @@
       "empty": "No comments yet. Be the first to leave a thoughtful note."
     },
     "placeholder": {
+      "content": "Say something...",
       "title": "Say something..."
     },
     "reply": {

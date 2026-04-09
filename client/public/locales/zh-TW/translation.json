@@ -97,14 +97,18 @@
     "author_name_required": "姓名不能為空",
     "empty": "留言內容不能為空",
     "form": {
+      "author_email_placeholder": "不會對外顯示",
       "author_email": "電子郵件",
       "author_name": "您的大名",
       "author_url": "個人網站",
+      "content": "留言內容",
       "desc": "留下您的留言，支援引用與回覆。",
       "remember_me": "記住個人資訊",
+      "required_label": "必填",
       "title": "我要發表看法"
     },
     "placeholder": {
+      "content": "說點什麼吧",
       "title": "說點什麼吧"
     },
     "reply": {

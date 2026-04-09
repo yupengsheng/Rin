@@ -450,7 +450,7 @@ function CommentInput({
         <textarea
           ref={textareaRef}
           id="comment"
-          placeholder={t("comment.placeholder.title")}
+          placeholder={t("comment.form.content_placeholder")}
           className="h-44 w-full rounded-[24px] border border-black/8 bg-[rgba(255,255,255,0.86)] px-4 py-3 text-sm leading-7 t-primary outline-none transition-all placeholder:text-neutral-400 focus:border-theme/40 focus:ring-4 focus:ring-theme/10 dark:border-white/10 dark:bg-[rgba(15,23,42,0.62)] dark:placeholder:text-neutral-500"
           value={content}
           disabled={isSubmitting}
@@ -491,12 +491,12 @@ function CommentInput({
             autoComplete="email"
             disabled={isSubmitting}
             required
+            placeholder={t("comment.form.author_email_placeholder")}
             onChange={(e) => {
               clearFeedback();
               setAuthorEmail(e.target.value);
             }}
           />
-          <p className="px-1 text-xs t-secondary">{t("comment.form.email_private")}</p>
         </div>
         <div className="flex flex-col gap-2 md:col-span-2">
           <label className="flex items-center gap-2 text-[13px] font-semibold t-primary">

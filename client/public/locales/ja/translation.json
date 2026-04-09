@@ -97,14 +97,18 @@
     "author_name_required": "名前は必須です",
     "empty": "コメント内容は空にできません",
     "form": {
+      "author_email_placeholder": "公開されません",
       "author_email": "メールアドレス",
       "author_name": "お名前",
       "author_url": "個人サイト",
+      "content": "コメント内容",
       "desc": "コメントを残してください。返信と引用に対応しています。",
       "remember_me": "個人情報を保存する",
+      "required_label": "必須",
       "title": "コメントを投稿する"
     },
     "placeholder": {
+      "content": "何か書いてみてください",
       "title": "何か言ってください..."
     },
     "reply": {
